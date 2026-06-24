@@ -2,7 +2,8 @@ import os, re, shutil, urllib.parse, requests, socket, logging
 from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
-
+# from flask import Flask, request, jsonify
+# import threading
 # Log em arquivo para diagnóstico
 logging.basicConfig(
     level=logging.INFO,
@@ -636,26 +637,107 @@ def build_app():
     app.add_error_handler(error_handler)
     return app
 
-def main():
-    import asyncio, time, sys
-    from telegram.error import Conflict
+flask_app = Flask(__name__)
+_telegram_app_ref = {"app": None}
+_main_event_loop = {"loop": None}
 
-    # Lock via socket TCP: só um processo pode segurar a porta 47321 ao mesmo tempo
-    lock_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    lock_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 0)
+
+def montar_mensagem_agendor(dados_negocio: dict) -> str:
+    org = dados_negocio.get("organization", {}) or {}
+    nome_empresa = org.get("name", "Não informado")
+    cnpj = org.get("cnpj") or "Não informado"
+    valor = dados_negocio.get("value", "Não informado")
+    whatsapp = (org.get("contact") or {}).get("whatsapp", "Não informado")
+    titulo = dados_negocio.get("title", "")
+
+    return (
+        f"🟢 *Novo negócio ganho no Agendor!*\n\n"
+        f"*Negócio:* {titulo}\n"
+        f"*Empresa:* {nome_empresa}\n"
+        f"*CNPJ:* {cnpj}\n"
+        f"*Valor:* R$ {valor}\n"
+        f"*WhatsApp:* {whatsapp}\n\n"
+        f"Use /novo no bot para iniciar o cadastro completo "
+        f"(os dados acima já estão prontos para copiar)."
+    )
+
+
+@flask_app.route("/webhook/agendor", methods=["POST"])
+def webhook_agendor():
     try:
-        lock_socket.bind(("127.0.0.1", 47321))
-    except OSError:
-        print("Outra instância já está rodando. Encerrando.")
-        lock_socket.close()
-        sys.exit(1)
+        payload = request.get_json(force=True)
+    except Exception as e:
+        return jsonify({"erro": f"JSON invalido: {e}"}), 400
 
+    try:
+        dados_lista = payload.get("dados") or payload.get("data") or []
+        if isinstance(dados_lista, list) and len(dados_lista) > 0:
+            negocio_id = dados_lista[0].get("id")
+        elif isinstance(dados_lista, dict):
+            negocio_id = dados_lista.get("id")
+        else:
+            negocio_id = None
+    except Exception:
+        negocio_id = None
+
+    if not negocio_id:
+        return jsonify({"erro": "Nao foi possivel extrair o ID do negocio"}), 400
+
+    import requests as _requests
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Token {os.environ.get('AGENDOR_TOKEN')}",
+    }
+    resp = _requests.get(
+        f"https://api.agendor.com.br/v3/deals/{negocio_id}",
+        headers=headers,
+    )
+
+    if resp.status_code != 200:
+        return jsonify({"erro": f"Agendor retornou {resp.status_code}"}), 502
+
+    dados_negocio = resp.json()
+
+    chat_id = os.environ.get("GRAZIELE_CHAT_ID")
+    if not chat_id:
+        return jsonify({"erro": "GRAZIELE_CHAT_ID nao configurado"}), 500
+
+    mensagem = montar_mensagem_agendor(dados_negocio)
+
+    app_ref = _telegram_app_ref["app"]
+    loop = _main_event_loop["loop"]
+
+    if app_ref and loop:
+        asyncio.run_coroutine_threadsafe(
+            app_ref.bot.send_message(
+                chat_id=int(chat_id), text=mensagem, parse_mode="Markdown"
+            ),
+            loop,
+        )
+
+    return jsonify({"status": "ok"}), 200
+
+
+def iniciar_flask():
+    porta = int(os.environ.get("PORT", 8080))
+    flask_app.run(host="0.0.0.0", port=porta, use_reloader=False)
+
+def main():
     try:
         while True:
             try:
-                asyncio.set_event_loop(asyncio.new_event_loop())
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
                 app = build_app()
+
+                _telegram_app_ref["app"] = app
+                _main_event_loop["loop"] = loop
+
+                flask_thread = threading.Thread(target=iniciar_flask, daemon=True)
+                flask_thread.start()
+
                 print("Canvas Bot rodando -- /novo para cadastrar")
+                print("Webhook do Agendor disponivel em /webhook/agendor")
                 app.run_polling(drop_pending_updates=True)
                 break
             except Conflict:
