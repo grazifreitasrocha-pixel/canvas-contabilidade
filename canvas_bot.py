@@ -58,7 +58,7 @@ SEM_TRELLO = {"4", "5", "6"}
 CONTRACT_TMPL     = Path(r"C:\Users\grazi.RAPHAEL\Downloads\Nova pasta (2)\Contrato Assessoria.docx.docx")
 CONTRACT_TMPL_MEI = Path(r"C:\Users\grazi.RAPHAEL\Downloads\Contrato MEI\Contrato_MEI_Canvas_Revisado.docx")
 CONTRATOS_DIR = Path(__file__).parent / "contratos"
-ASAAS_URL     = "url_asaas = "https://api.asaas.com/v3/payments?access_token=XXXXXXXXX""
+ASAAS_URL     = "https://api.asaas.com/v3/payments"
 
 # ── Estados ────────────────────────────────────────────────────────────────────
 (TIPO, EMPRESA, CNPJ, REGIME, DATA_INICIO, SERVICOS, FOLHA,
