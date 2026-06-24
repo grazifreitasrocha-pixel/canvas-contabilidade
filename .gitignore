@@ -1,0 +1,17 @@
+.env
+canvas-cobranca/
+*.db
+*.db-journal
+__pycache__/
+*.pyc
+.venv/
+*.log
+*.json
+*.txt
+bot_error.txt
+bot_output.txt
+contratos/
+Contrato MEI/
+Nova pasta/
+Nova pasta (2)/
+Canvas Contabilidade/

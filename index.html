@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canvas Contabilidade — Aqui a gente não para</title>
+  <meta name="description" content="Contabilidade digital para empresários, MEIs e pequenos negócios. Abertura de empresa, IR, assessoria contábil e muito mais. Atendimento ágil e personalizado." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <a href="#" class="navbar-logo">
+      <img src="Nova pasta/02.png" alt="Canvas Contabilidade" />
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="navbar-links" id="navLinks">
+      <li><a href="#servicos">Serviços</a></li>
+      <li><a href="#como-funciona">Como Funciona</a></li>
+      <li><a href="#depoimentos">Depoimentos</a></li>
+      <li><a href="#sobre">Sobre</a></li>
+      <li><a href="#contato" class="navbar-cta">Fale Conosco</a></li>
+      <li>
+        <a href="https://onvio.com.br/clientcenter/company/3C8218D067E846D5B0091433B292EA48"
+           class="navbar-portal" target="_blank" rel="noopener noreferrer">
+          🔐 Portal do Cliente
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" id="inicio">
+    <img src="Nova pasta/02.png" alt="Canvas Contabilidade" class="hero-logo" />
+    <span class="hero-lema">✦ Aqui a gente não para ✦</span>
+
+    <h1>Sua empresa crescendo.<br /><span>Seus impostos no limite certo.</span></h1>
+
+    <p class="hero-sub">
+      Cuidamos de toda a parte contábil, fiscal e trabalhista para você ter mais tempo,
+      mais clareza nos números e mais tranquilidade no dia a dia do seu negócio.
+    </p>
+
+    <div class="hero-ctas">
+      <a href="https://wa.me/5564992027010?text=Olá!%20Vim%20pelo%20site%20da%20Canvas%20e%20quero%20saber%20como%20reduzir%20meus%20impostos."
+         class="btn-whatsapp" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        Quero pagar menos imposto
+      </a>
+      <a href="#servicos" class="btn-outline">Ver nossos serviços</a>
+    </div>
+
+    <p class="hero-apoio">✅ Sem letras miúdas &nbsp;·&nbsp; ✅ Atendimento via WhatsApp &nbsp;·&nbsp; ✅ 100% digital</p>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <strong>+200</strong>
+        <span>Clientes ativos</span>
+      </div>
+      <div class="hero-stat">
+        <strong>+5 anos</strong>
+        <span>De experiência</span>
+      </div>
+      <div class="hero-stat">
+        <strong>100%</strong>
+        <span>Digital e ágil</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PROVA SOCIAL RÁPIDA ===== -->
+  <section class="prova-social-barra">
+    <div class="container">
+      <span>Empresas que já confiam na Canvas:</span>
+      <div class="empresas-lista">
+        <span>Ecovolt Engenharia</span>
+        <span>·</span>
+        <span>Só Casas Temporadas</span>
+        <span>·</span>
+        <span>Brassul Móveis</span>
+        <span>·</span>
+        <span>DC Automotive</span>
+        <span>·</span>
+        <span>Farma Caldas</span>
+        <span>·</span>
+        <span>e mais de 200 empresas</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SERVIÇOS ===== -->
+  <section id="servicos">
+    <div class="container">
+      <span class="section-label">O que fazemos por você</span>
+      <h2 class="section-title">Tudo que sua empresa precisa,<br/>em um só lugar</h2>
+      <p class="section-subtitle">Chega de preocupação com burocracia, multa e declaração fora do prazo. A Canvas resolve.</p>
+
+      <div class="servicos-grid">
+        <div class="servico-card">
+          <div class="servico-icone">🏢</div>
+          <h3>Abertura de Empresa</h3>
+          <p>Abra sua empresa do jeito certo, no regime tributário ideal, sem pagar imposto a mais desde o primeiro dia.</p>
+          <a href="https://wa.me/5564992027010?text=Quero%20abrir%20minha%20empresa%20com%20a%20Canvas!" class="servico-link" target="_blank">Quero abrir minha empresa →</a>
+        </div>
+        <div class="servico-card">
+          <div class="servico-icone">📊</div>
+          <h3>Assessoria Contábil</h3>
+          <p>Contabilidade completa com balanços, relatórios e obrigações sempre em dia. Você foca no negócio, a gente cuida do resto.</p>
+          <a href="https://wa.me/5564992027010?text=Quero%20assessoria%20contábil%20da%20Canvas!" class="servico-link" target="_blank">Saiba mais →</a>
+        </div>
+        <div class="servico-card">
+          <div class="servico-icone">🟡</div>
+          <h3>Assessoria para MEI</h3>
+          <p>MEI também merece suporte profissional. Cuide das suas obrigações sem complicação e cresça com segurança.</p>
+          <a href="https://wa.me/5564992027010?text=Sou%20MEI%20e%20quero%20assessoria%20da%20Canvas!" class="servico-link" target="_blank">Sou MEI, quero ajuda →</a>
+        </div>
+        <div class="servico-card">
+          <div class="servico-icone">💡</div>
+          <h3>Consultoria Tributária</h3>
+          <p>Descubra quanto sua empresa está pagando a mais de imposto e como reduzir de forma 100% legal e estratégica.</p>
+          <a href="https://wa.me/5564992027010?text=Quero%20uma%20consultoria%20tributária!" class="servico-link" target="_blank">Quero reduzir impostos →</a>
+        </div>
+        <div class="servico-card">
+          <div class="servico-icone">™️</div>
+          <h3>Registro de Marca</h3>
+          <p>Proteja o nome da sua empresa no INPI. Registro de marca com acompanhamento completo do processo.</p>
+          <a href="https://wa.me/5564992027010?text=Quero%20registrar%20minha%20marca!" class="servico-link" target="_blank">Proteger minha marca →</a>
+        </div>
+        <div class="servico-card">
+          <div class="servico-icone">💼</div>
+          <h3>Terceirização Financeira</h3>
+          <p>BPO Financeiro completo: contas a pagar, a receber, fluxo de caixa e relatórios. Seu financeiro nas melhores mãos.</p>
+          <a href="https://wa.me/5564992027010?text=Quero%20terceirizar%20meu%20financeiro!" class="servico-link" target="_blank">Quero saber mais →</a>
+        </div>
+        <div class="servico-card">
+          <div class="servico-icone">📋</div>
+          <h3>Imposto de Renda</h3>
+          <p>Declaração de IR para pessoa física e jurídica, sem erros, dentro do prazo e aproveitando todas as deduções.</p>
+          <a href="https://wa.me/5564992027010?text=Quero%20declarar%20meu%20IR%20com%20a%20Canvas!" class="servico-link" target="_blank">Declarar meu IR →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== COMO FUNCIONA ===== -->
+  <section id="como-funciona" class="como-funciona">
+    <div class="container">
+      <span class="section-label">Simples assim</span>
+      <h2 class="section-title">Como funciona a Canvas</h2>
+      <p class="section-subtitle">Sem papelada, sem complicação. Em 4 passos simples você já está com a contabilidade em dia.</p>
+
+      <div class="passos-grid">
+        <div class="passo">
+          <div class="passo-numero">01</div>
+          <h3>Você fala com a gente</h3>
+          <p>Manda um WhatsApp, conta um pouco sobre sua empresa e tiramos todas as suas dúvidas sem compromisso.</p>
+        </div>
+        <div class="passo-seta">→</div>
+        <div class="passo">
+          <div class="passo-numero">02</div>
+          <h3>Fazemos um diagnóstico</h3>
+          <p>Analisamos sua situação atual, regime tributário e identificamos oportunidades de economia que você não sabia que existiam.</p>
+        </div>
+        <div class="passo-seta">→</div>
+        <div class="passo">
+          <div class="passo-numero">03</div>
+          <h3>A Canvas assume tudo</h3>
+          <p>Assinamos o contrato de forma digital e nossa equipe já começa a cuidar de todas as suas obrigações.</p>
+        </div>
+        <div class="passo-seta">→</div>
+        <div class="passo">
+          <div class="passo-numero">04</div>
+          <h3>Você só cuida do negócio</h3>
+          <p>Você foca em crescer. A gente cuida de tudo: guias, declarações, folha, obrigações — sem você precisar se preocupar.</p>
+        </div>
+      </div>
+
+      <div class="como-cta">
+        <a href="https://wa.me/5564992027010?text=Olá!%20Quero%20começar%20com%20a%20Canvas%20Contabilidade!"
+           class="btn-whatsapp" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="width:20px;height:20px">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          Começar agora — é grátis a conversa
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DIFERENCIAIS ===== -->
+  <section id="diferenciais">
+    <div class="container">
+      <span class="section-label">Por que escolher a Canvas</span>
+      <h2 class="section-title">O que você ganha sendo<br/>cliente Canvas</h2>
+      <p class="section-subtitle">Não somos só uma contabilidade. Somos o parceiro que você precisava para crescer com segurança.</p>
+
+      <div class="diferenciais-grid">
+        <div class="diferencial-item">
+          <div class="diferencial-icone">💰</div>
+          <div>
+            <h3>Você paga menos imposto</h3>
+            <p>Nosso time analisa o melhor regime tributário para o seu negócio e garante que você não pague um centavo a mais do que deve.</p>
+          </div>
+        </div>
+        <div class="diferencial-item">
+          <div class="diferencial-icone">⚡</div>
+          <div>
+            <h3>Resposta rápida, sempre</h3>
+            <p>Sem esperar dias por uma resposta. Nossa equipe está disponível via WhatsApp com agilidade para resolver suas dúvidas.</p>
+          </div>
+        </div>
+        <div class="diferencial-item">
+          <div class="diferencial-icone">📱</div>
+          <div>
+            <h3>Tudo 100% digital</h3>
+            <p>Nada de papel ou deslocamento. Documentos, relatórios e assinaturas — tudo pelo celular ou computador, de onde você estiver.</p>
+          </div>
+        </div>
+        <div class="diferencial-item">
+          <div class="diferencial-icone">🛡️</div>
+          <div>
+            <h3>Empresa sempre protegida</h3>
+            <p>Nenhuma multa por atraso, nenhuma surpresa do fisco. Você fica em dia com todas as obrigações sem precisar se preocupar.</p>
+          </div>
+        </div>
+        <div class="diferencial-item">
+          <div class="diferencial-icone">📈</div>
+          <div>
+            <h3>Relatórios que fazem sentido</h3>
+            <p>Você entende a situação real da sua empresa com relatórios claros, em linguagem simples — não em "contabilês".</p>
+          </div>
+        </div>
+        <div class="diferencial-item">
+          <div class="diferencial-icone">🤝</div>
+          <div>
+            <h3>Parceiro de verdade</h3>
+            <p>Sua contadora conhece seu negócio pelo nome. Atendimento personalizado, próximo e sem burocracia desnecessária.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DEPOIMENTOS ===== -->
+  <section id="depoimentos">
+    <div class="container">
+      <span class="section-label">Quem já confia na Canvas</span>
+      <h2 class="section-title">Resultados reais de clientes reais</h2>
+      <p class="section-subtitle">Não falamos apenas por nós. Veja o que dizem os empresários que escolheram a Canvas.</p>
+
+      <div class="depoimentos-grid">
+        <div class="depoimento-card">
+          <div class="depoimento-estrelas">★★★★★</div>
+          <p>"A Canvas é o diferencial na região quando se trata de escritório de contabilidade. Eles prezam a proximidade com seus clientes, investindo num bom atendimento em pós vendas. Raphael e sua equipe dispostos a entregar serviços de qualidade."</p>
+          <div class="depoimento-autor">
+            <div class="depoimento-avatar">MM</div>
+            <div>
+              <strong>Marcelo Miranda</strong>
+              <span>Ecovolt Engenharia</span>
+            </div>
+          </div>
+        </div>
+        <div class="depoimento-card">
+          <div class="depoimento-estrelas">★★★★★</div>
+          <p>"Atendimento rápido, eficiente e muito prestativo. Sempre esclarecem minhas dúvidas com clareza e agilidade, desde a contabilidade da empresa até a declaração do imposto de renda pessoa física. Recomendo demais!"</p>
+          <div class="depoimento-autor">
+            <div class="depoimento-avatar">RO</div>
+            <div>
+              <strong>Ruan Oliveira</strong>
+              <span>Cliente Canvas</span>
+            </div>
+          </div>
+        </div>
+        <div class="depoimento-card">
+          <div class="depoimento-estrelas">★★★★★</div>
+          <p>"Minha contabilidade é Canvas! Eles resolvem todas as demandas da minha empresa com maestria. Uma equipe que faz a diferença em cada detalhe. Se você busca uma contabilidade de excelência, indico demais! Parabéns aos líderes Raphael e Grazielle pelo profissionalismo e pela equipe incrível que construíram. 👏"</p>
+          <div class="depoimento-autor">
+            <div class="depoimento-avatar">JO</div>
+            <div>
+              <strong>Josy</strong>
+              <span>Só Casas Temporadas</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SOBRE ===== -->
+  <section id="sobre" class="sobre">
+    <div class="container sobre-inner">
+      <div class="sobre-texto">
+        <span class="section-label">Quem somos</span>
+        <h2 class="section-title" style="text-align:left">Uma contabilidade feita por pessoas que se importam</h2>
+        <p>A Canvas Contabilidade nasceu com um propósito claro: ser o escritório de contabilidade que o empresário brasileiro merece — ágil, digital, próximo e honesto.</p>
+        <p>Somos liderados por <strong>Raphael e Grazielle</strong>, profissionais com mais de 5 anos de experiência no mercado, que entendem que contabilidade vai muito além de preencher declarações. É sobre dar segurança, clareza e liberdade para o empreendedor crescer.</p>
+        <p>Atendemos mais de <strong>200 empresas</strong> em Caldas Novas/GO e região, de MEIs a empresas de médio porte, em setores como saúde, varejo, tecnologia, construção, alimentação e serviços.</p>
+        <p class="sobre-lema">"Aqui a gente não para — e o seu negócio também não vai parar."</p>
+        <a href="https://wa.me/5564992027010?text=Olá!%20Quero%20conhecer%20melhor%20a%20Canvas%20Contabilidade."
+           class="btn-whatsapp" target="_blank" rel="noopener" style="margin-top:1.5rem;display:inline-flex">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="width:20px;height:20px">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+          Falar com a equipe Canvas
+        </a>
+      </div>
+      <div class="sobre-nums">
+        <div class="sobre-num-card">
+          <strong>+200</strong>
+          <span>Empresas atendidas</span>
+        </div>
+        <div class="sobre-num-card">
+          <strong>+5 anos</strong>
+          <span>No mercado</span>
+        </div>
+        <div class="sobre-num-card">
+          <strong>7</strong>
+          <span>Serviços especializados</span>
+        </div>
+        <div class="sobre-num-card">
+          <strong>100%</strong>
+          <span>Digital e moderno</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PORTAL DO CLIENTE ===== -->
+  <section id="portal" class="portal-section">
+    <div class="container portal-inner">
+      <div class="portal-texto">
+        <span class="section-label">Tecnologia a seu favor</span>
+        <h2 class="section-title" style="text-align:left">Portal do Cliente:<br/>sua contabilidade<br/>na palma da mão</h2>
+        <p>Acesse documentos, relatórios, guias e demonstrativos a qualquer hora, de qualquer lugar. Sem precisar ligar, sem esperar e-mail.</p>
+        <ul class="portal-lista">
+          <li>✅ Documentos organizados e sempre disponíveis</li>
+          <li>✅ Histórico completo da sua empresa</li>
+          <li>✅ Acesso 24h pelo celular ou computador</li>
+          <li>✅ Seguro, rápido e fácil de usar</li>
+        </ul>
+        <a href="https://onvio.com.br/clientcenter/company/3C8218D067E846D5B0091433B292EA48"
+           class="btn-portal" target="_blank" rel="noopener noreferrer">
+          🔐 Acessar o Portal do Cliente
+        </a>
+        <p class="portal-obs">Já é cliente? Acesse com seu e-mail e senha cadastrados.</p>
+      </div>
+      <div class="portal-visual">
+        <div class="portal-card-demo">
+          <div class="portal-card-header">
+            <span>🔐</span>
+            <strong>Portal do Cliente</strong>
+            <span class="portal-badge">Online</span>
+          </div>
+          <div class="portal-card-items">
+            <div class="portal-item">📄 Balancete — Março 2026</div>
+            <div class="portal-item">📊 DRE — 1º Trimestre 2026</div>
+            <div class="portal-item">🧾 Guias FGTS — Março 2026</div>
+            <div class="portal-item">📋 Folha de Pagamento — Março</div>
+            <div class="portal-item">✅ Certidão Negativa Federal</div>
+          </div>
+          <a href="https://onvio.com.br/clientcenter/company/3C8218D067E846D5B0091433B292EA48"
+             target="_blank" rel="noopener" class="portal-btn-demo">Entrar no portal →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA FINAL ===== -->
+  <section id="contato" class="cta-final">
+    <div class="container">
+      <span class="section-label" style="color:var(--dourado)">Bora começar?</span>
+      <h2 class="section-title" style="color:#fff">Chega de pagar imposto a mais.<br/>Sua empresa merece melhor.</h2>
+      <p class="section-subtitle" style="color:rgba(255,255,255,0.85)">
+        Manda uma mensagem agora. A conversa é gratuita e sem compromisso.<br/>
+        Em poucos minutos você já descobre como a Canvas pode transformar sua contabilidade.
+      </p>
+
+      <a href="https://wa.me/5564992027010?text=Olá!%20Vim%20pelo%20site%20e%20quero%20uma%20análise%20gratuita%20da%20Canvas%20Contabilidade."
+         class="btn-whatsapp btn-grande" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        Quero minha análise gratuita agora
+      </a>
+
+      <div class="cta-contatos">
+        <a href="tel:+5564992027010">📞 (64) 99202-7010</a>
+        <span>·</span>
+        <a href="mailto:contato@canvascontabilidade.com.br">📧 contato@canvascontabilidade.com.br</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <img src="Nova pasta/02.png" alt="Canvas Contabilidade" />
+    <p>© 2025 Canvas Contabilidade · CNPJ 46.662.006/0001-25 · Caldas Novas / GO</p>
+    <p><a href="mailto:contato@canvascontabilidade.com.br">contato@canvascontabilidade.com.br</a> · <a href="tel:+5564992027010">(64) 99202-7010</a></p>
+    <p style="margin-top:0.4rem;font-style:italic;color:#3a5a52;">Aqui a gente não para ✦</p>
+  </footer>
+
+  <!-- Botão flutuante WhatsApp -->
+  <a href="https://wa.me/5564992027010?text=Olá!%20Vim%20pelo%20site%20da%20Canvas%20Contabilidade%20e%20gostaria%20de%20saber%20mais."
+     class="whatsapp-float" target="_blank" rel="noopener" aria-label="Chamar no WhatsApp">
+    <svg viewBox="0 0 24 24" fill="white" aria-hidden="true">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  </a>
+
+  <script src="script.js"></script>
+</body>
+</html>
