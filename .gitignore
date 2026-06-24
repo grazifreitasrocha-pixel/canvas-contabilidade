@@ -7,7 +7,7 @@ __pycache__/
 .venv/
 *.log
 *.json
-*.txt
+log.txt
 bot_error.txt
 bot_output.txt
 contratos/
