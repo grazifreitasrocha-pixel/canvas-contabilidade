@@ -2,8 +2,8 @@ import os, re, shutil, urllib.parse, requests, socket, logging
 from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
-# from flask import Flask, request, jsonify
-# import threading
+from flask import Flask, request, jsonify
+import threading
 # Log em arquivo para diagnóstico
 logging.basicConfig(
     level=logging.INFO,
