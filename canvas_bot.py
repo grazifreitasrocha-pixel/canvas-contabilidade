@@ -724,30 +724,6 @@ def iniciar_flask():
     porta = int(os.environ.get("PORT", 8080))
     flask_app.run(host="0.0.0.0", port=porta, use_reloader=False)
 
-def main():
-    try:
-        while True:
-            try:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                app = build_app()
-
-                _telegram_app_ref["app"] = app
-                _main_event_loop["loop"] = loop
-
-                flask_thread = threading.Thread(target=iniciar_flask, daemon=True)
-                flask_thread.start()
-
-                print("Canvas Bot rodando -- /novo para cadastrar")
-                print("Webhook do Agendor disponivel em /webhook/agendor")
-                app.run_polling(drop_pending_updates=True)
-                break
-            except Conflict:
-                print("Conflito: outro bot ativo. Aguardando 20s e tentando novamente...")
-                time.sleep(20)
-            except Exception as e:
-                print(f"Erro inesperado: {e}. Reiniciando em 10s...")
-                time.sleep(10)
 
 def main():
     while True:
