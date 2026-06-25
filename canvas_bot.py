@@ -1,9 +1,11 @@
 import os, re, shutil, urllib.parse, requests, socket, logging
+import asyncio, time, sys
 from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 import threading
+from telegram.error import Conflict
 # Log em arquivo para diagnóstico
 logging.basicConfig(
     level=logging.INFO,
@@ -746,8 +748,30 @@ def main():
             except Exception as e:
                 print(f"Erro inesperado: {e}. Reiniciando em 10s...")
                 time.sleep(10)
-    finally:
-        lock_socket.close()
+
+def main():
+    while True:
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            app = build_app()
+
+            _telegram_app_ref["app"] = app
+            _main_event_loop["loop"] = loop
+
+            flask_thread = threading.Thread(target=iniciar_flask, daemon=True)
+            flask_thread.start()
+
+            print("Canvas Bot rodando -- /novo para cadastrar")
+            print("Webhook do Agendor disponivel em /webhook/agendor")
+            app.run_polling(drop_pending_updates=True)
+            break
+        except Conflict:
+            print("Conflito: outro bot ativo. Aguardando 20s e tentando novamente...")
+            time.sleep(20)
+        except Exception as e:
+            print(f"Erro inesperado: {e}. Reiniciando em 10s...")
+            time.sleep(10)
 
 if __name__ == "__main__":
     main()
