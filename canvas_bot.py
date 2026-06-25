@@ -3,7 +3,6 @@ import asyncio, time, sys
 from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
-print("TESTE:", os.environ.get("TESTE_SIMPLES", "NAO ENCONTROU"))
 from flask import Flask, request, jsonify
 import threading
 from telegram.error import Conflict
