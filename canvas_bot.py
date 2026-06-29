@@ -668,6 +668,7 @@ def montar_mensagem_agendor(dados_negocio: dict) -> str:
 def webhook_agendor():
     try:
         payload = request.get_json(force=True)
+        print("PAYLOAD RECEBIDO DO AGENDOR:", payload)
     except Exception as e:
         return jsonify({"erro": f"JSON invalido: {e}"}), 400
 
