@@ -56,7 +56,77 @@ TIPOS = {
 }
 
 # Tipos que NÃO têm Trello
-SEM_TRELLO = {"4", "5", "6"}
+
+def trello_add_card(tipo: str, nome: str, desc: str) -> str:
+    """
+    Cria um cartao novo no Trello, na lista de entrada correspondente
+    ao tipo de servico, e copia os checklists do cartao modelo
+    (TEMPLATE_CARD_INTEGRACAO) para o cartao recem-criado.
+
+    Retorna a URL do cartao criado.
+    """
+    list_id = ENTRY_LISTS.get(tipo)
+    if not list_id:
+        raise ValueError(f"Tipo '{tipo}' nao tem lista de entrada configurada")
+
+    # Cria o cartao
+    r = requests.post(
+        "https://api.trello.com/1/cards",
+        params={"key": TRELLO_KEY, "token": TRELLO_TOK},
+        json={"name": nome, "desc": desc, "idList": list_id, "pos": "top"},
+    )
+    r.raise_for_status()
+    card = r.json()
+    card_id = card["id"]
+    card_url = card.get("shortUrl") or card.get("url")
+
+    # Copia os checklists do cartao modelo, se houver um configurado
+    # para este tipo de servico (so faz sentido para Integracao, "1")
+    if tipo == "1" and TEMPLATE_CARD_INTEGRACAO:
+        try:
+            r_checklists = requests.get(
+                f"https://api.trello.com/1/cards/{TEMPLATE_CARD_INTEGRACAO}/checklists",
+                params={"key": TRELLO_KEY, "token": TRELLO_TOK},
+            )
+            r_checklists.raise_for_status()
+            for checklist in r_checklists.json():
+                requests.post(
+                    "https://api.trello.com/1/checklists",
+                    params={"key": TRELLO_KEY, "token": TRELLO_TOK},
+                    json={"idCard": card_id, "idChecklistSource": checklist["id"]},
+                ).raise_for_status()
+        except Exception:
+            # Se copiar o checklist falhar, o cartao ja foi criado -
+            # nao queremos que isso quebre o cadastro inteiro
+            pass
+
+    return card_url
+
+def calcular_competencia(data_texto: str) -> str:
+    """
+    Recebe a data de inicio digitada (ex: '25/06/2026') e retorna
+    a competencia no formato 'Mes/Ano' (ex: 'Junho/2026').
+    """
+    texto = data_texto.strip()
+    partes = re.split(r"[/\-]", texto)
+
+    if len(partes) != 3:
+        return "verificar manualmente"
+
+    try:
+        mes_num = int(partes[1])
+        ano_num = int(partes[2])
+    except (ValueError, IndexError):
+        return "verificar manualmente"
+
+    if not (1 <= mes_num <= 12):
+        return "verificar manualmente"
+
+    if ano_num < 100:
+        ano_num += 2000
+
+    nome_mes = MESES_PT[mes_num - 1].capitalize()
+    return f"{nome_mes}/{ano_num}"
 
 CONTRACT_TMPL     = Path(__file__).parent / "templates" / "Contrato Assessoria.docx.docx"
 CONTRACT_TMPL_MEI = Path(__file__).parent / "templates" / "Contrato_MEI_Canvas_Revisado.docx"
