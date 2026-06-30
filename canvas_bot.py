@@ -96,6 +96,7 @@ ASAAS_URL     = "https://api.asaas.com/v3/payments"
             log.append({"tipo": "erro", "msg": f"Trello: {e}"})
     else:
         log.append({"tipo": "info", "msg": "Sem Trello para este serviço"})
+  
         
 # ── Asaas ──────────────────────────────────────────────────────────────────────
 
