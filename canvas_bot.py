@@ -682,9 +682,9 @@ def webhook_agendor():
     if not dados_negocio:
         return jsonify({"erro": "Campo 'data' nao encontrado no payload"}), 400
 
-    chat_id = os.environ.get("GRAZIELE_CHAT_ID")
+    chat_id = os.environ.get("GRUPO_AGENDOR_ID")
     if not chat_id:
-        return jsonify({"erro": "GRAZIELE_CHAT_ID nao configurado"}), 500
+        return jsonify({"erro": "GRUPO_AGENDOR_ID nao configurado"}), 500
 
     mensagem = montar_mensagem_agendor(dados_negocio)
 
