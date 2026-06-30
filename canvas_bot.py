@@ -1,6 +1,6 @@
 import os, re, shutil, urllib.parse, requests, socket, logging
 import asyncio, time, sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
@@ -36,7 +36,7 @@ TRELLO_TOK = os.environ["TRELLO_API_TOKEN"]
 ASAAS_KEY  = os.environ.get("ASAAS_KEY", "")
 
 # Card modelo com checklist de integração
-TEMPLATE_CARD_INTEGRACAO = "KbA4dhyW",
+TEMPLATE_CARD_INTEGRACAO = "KbA4dhyW"
 
 # IDs das listas de entrada em cada quadro
 ENTRY_LISTS = {
@@ -56,6 +56,7 @@ TIPOS = {
 }
 
 # Tipos que NÃO têm Trello
+SEM_TRELLO = {"4", "5", "6"}
 
 def trello_add_card(tipo: str, nome: str, desc: str) -> str:
     """
