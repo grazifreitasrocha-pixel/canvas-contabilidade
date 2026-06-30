@@ -30,6 +30,7 @@
   input:focus, select:focus, textarea:focus { border-color: #25695c; background: #fff; }
   textarea { resize: vertical; min-height: 70px; }
   input:disabled, select:disabled { background: #f0f0f0; color: #999; }
+  .help { font-size: 11px; color: #888; margin-top: 4px; line-height: 1.4; }
 
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
@@ -147,6 +148,7 @@
       <div class="cnpj-wrap">
         <input id="cnpj" placeholder="00.000.000/0001-00" oninput="onCnpjInput()">
       </div>
+      <div class="help">Digite e aguarde — os campos abaixo são preenchidos automaticamente.</div>
       <div class="cnpj-status" id="cnpj-status"></div>
     </div>
     <div class="field"><label>Nome / Razão Social <span>*</span></label><input id="nome" placeholder="Preenchido automaticamente"></div>
@@ -156,18 +158,34 @@
     <div class="field"><label>Data de Abertura</label><input id="data_abertura" placeholder="Preenchido automaticamente"></div>
   </div>
   <div class="row2">
-    <div class="field"><label>Atividades Secundárias</label><input id="atividades_secundarias" placeholder="Preenchido automaticamente"></div>
+    <div class="field">
+      <label>Atividades Secundárias</label>
+      <input id="atividades_secundarias" placeholder="Preenchido automaticamente">
+      <div class="help">Não precisa preencher — pode deixar vazio se a busca não trouxer nada.</div>
+    </div>
   </div>
   <div class="row2">
-    <div class="field"><label>Representante Legal</label><input id="representante" placeholder="Nome completo do sócio/titular"></div>
+    <div class="field">
+      <label>Representante Legal</label>
+      <input id="representante" placeholder="Nome completo do sócio/titular">
+      <div class="help">Se a empresa tiver mais de um sócio, escolha qual deles assina o contrato.</div>
+    </div>
     <div class="field"><label>CPF do Representante</label><input id="cpf" placeholder="000.000.000-00"></div>
   </div>
   <div class="row2">
-    <div class="field"><label>Endereço da Empresa</label><input id="end_empresa" placeholder="Rua, número, bairro, cidade/UF"></div>
+    <div class="field">
+      <label>Endereço da Empresa</label>
+      <input id="end_empresa" placeholder="Rua, número, bairro, cidade/UF">
+      <div class="help">Necessário apenas para gerar o contrato — pode completar depois.</div>
+    </div>
     <div class="field"><label>Endereço do Representante</label><input id="end_rep" placeholder="Rua, número, bairro, cidade/UF"></div>
   </div>
   <div class="row2">
-    <div class="field"><label>Telefone WhatsApp <span>*</span></label><input id="telefone" placeholder="64 99202-7010"></div>
+    <div class="field">
+      <label>Telefone WhatsApp <span>*</span></label>
+      <input id="telefone" placeholder="64 99202-7010">
+      <div class="help">Só números, com DDD. Usado para enviar boas-vindas e boleto.</div>
+    </div>
     <div class="field"><label>Responsável interno <span>*</span></label><input id="responsavel" placeholder="Quem da Canvas cuida deste cliente"></div>
   </div>
 
@@ -175,34 +193,68 @@
   <div id="bloco-contabil">
     <div class="secao">Dados Contábeis</div>
     <div class="row3">
-      <div class="field"><label>Regime Tributário</label><select id="regime"><option value="">Selecione...</option><option>Simples Nacional</option><option>Lucro Presumido</option><option>Lucro Real</option><option>MEI</option></select></div>
-      <div class="field"><label>Início da Responsabilidade</label><input id="inicio_resp" type="date"></div>
-      <div class="field"><label>Folha de Pagamento</label><select id="folha"><option value="">—</option><option>Sim</option><option>Não</option></select></div>
+      <div class="field"><label>Regime Tributário <span>*</span></label><select id="regime"><option value="">Selecione...</option><option>Simples Nacional</option><option>Lucro Presumido</option><option>Lucro Real</option><option>MEI</option></select></div>
+      <div class="field">
+        <label>Data de Assinatura <span>*</span></label>
+        <input id="inicio_resp" type="date">
+        <div class="help">Define a competência (mês em que a contabilidade assume).</div>
+      </div>
+      <div class="field"><label>Folha de Pagamento <span>*</span></label><select id="folha"><option value="">—</option><option>Sim</option><option>Não</option></select></div>
     </div>
-    <div class="field"><label>Serviços Contratados</label><input id="servicos" placeholder="Contábil, Fiscal, DP..."></div>
+    <div class="field">
+      <label>Serviços Contratados <span>*</span></label>
+      <input id="servicos" placeholder="Contábil, Fiscal, DP...">
+      <div class="help">Vem sugerido pela atividade do CNPJ — ajuste se o serviço contratado for diferente.</div>
+    </div>
   </div>
 
   <!-- PAGAMENTO -->
   <div class="secao">Honorário e Pagamento</div>
   <div class="row2">
-    <div class="field"><label>Valor do Honorário</label><input id="honorario" placeholder="350,00"></div>
-    <div class="field"><label>Dia do Vencimento</label>
+    <div class="field">
+      <label>Valor do Honorário <span>*</span></label>
+      <input id="honorario" placeholder="350,00">
+      <div class="help">Se for parcelado, informe o valor total — o sistema divide sozinho.</div>
+    </div>
+    <div class="field"><label>Dia do Vencimento <span>*</span></label>
       <input id="vencimento" type="number" min="1" max="31" placeholder="Ex: 10" value="15">
     </div>
   </div>
   <div class="field">
-    <label>Forma de Pagamento</label>
+    <label>Forma de Pagamento <span>*</span></label>
     <div class="radio-group">
       <label><input type="radio" name="forma_pag" value="boleto" checked> Boleto (gera no Asaas)</label>
       <label><input type="radio" name="forma_pag" value="pix"> PIX (manual)</label>
     </div>
   </div>
   <div class="field">
-    <label>Tipo de Serviço</label>
+    <label>Tipo de Serviço <span>*</span></label>
     <div class="radio-group">
-      <label><input type="radio" name="tipo_servico" value="recorrente" checked> Recorrente (mensal)</label>
-      <label><input type="radio" name="tipo_servico" value="venda_unica"> Venda Única</label>
+      <label><input type="radio" name="tipo_servico" value="recorrente" checked onclick="toggleParcelas()"> Recorrente (mensal)</label>
+      <label><input type="radio" name="tipo_servico" value="venda_unica" onclick="toggleParcelas()"> Venda Única</label>
     </div>
+    <div class="help">Recorrente = mensalidade contínua. Venda Única = serviço pontual (ex: abertura, alvará).</div>
+  </div>
+  <div class="field" id="bloco-parcelas" style="display:none">
+    <label>Em quantas parcelas?</label>
+    <div class="row2">
+      <select id="parcelas">
+        <option value="1">À vista (1x)</option>
+        <option value="2">2x</option>
+        <option value="3">3x</option>
+        <option value="4">4x</option>
+        <option value="5">5x</option>
+        <option value="6">6x</option>
+        <option value="7">7x</option>
+        <option value="8">8x</option>
+        <option value="9">9x</option>
+        <option value="10">10x</option>
+        <option value="11">11x</option>
+        <option value="12">12x</option>
+      </select>
+      <input id="intervalo_parcelas" type="number" min="1" value="30" placeholder="Dias entre parcelas">
+    </div>
+    <div class="help">O valor do "Honorário" acima é dividido automaticamente pelo número de parcelas.</div>
   </div>
 
   <!-- OBSERVAÇÕES -->
@@ -210,7 +262,9 @@
   <div class="field">
     <label>Detalhes da Solicitação</label>
     <textarea id="observacoes" placeholder="Descreva a solicitação do cliente, informações relevantes, etc."></textarea>
+    <div class="help">Opcional — preencha só se houver algo importante para o time saber.</div>
   </div>
+
 
   <button class="btn" id="btn" onclick="cadastrar()">CADASTRAR CLIENTE</button>
 
@@ -272,6 +326,12 @@ function setModalidade(btn) {
   modalidadeAtual = btn.dataset.val;
 }
 
+function toggleParcelas() {
+  const tipoServico = document.querySelector('input[name="tipo_servico"]:checked').value;
+  const bloco = document.getElementById('bloco-parcelas');
+  bloco.style.display = tipoServico === 'venda_unica' ? '' : 'none';
+}
+
 document.getElementById('bloco-contabil').style.display = '';
 
 // ───────────────────────────────────────────────────────────
@@ -330,6 +390,19 @@ async function buscarCnpj(cnpj) {
         .map(c => `${c.codigo} - ${c.descricao}`)
         .join('; ');
       campoAtivSec.value = lista;
+    }
+
+    // QSA (socios) - a Receita nao disponibiliza CPF publico, so nome.
+    // Se tiver 1 socio so, preenche automaticamente o representante legal.
+    // Se tiver mais de um, deixa um aviso para a Graziele escolher manualmente.
+    const campoRepresentante = document.getElementById('representante');
+    if (campoRepresentante && Array.isArray(dados.qsa) && dados.qsa.length > 0) {
+      if (dados.qsa.length === 1) {
+        campoRepresentante.value = dados.qsa[0].nome_socio || '';
+      } else if (!campoRepresentante.value) {
+        const nomes = dados.qsa.map(s => s.nome_socio).filter(Boolean).join(', ');
+        campoRepresentante.placeholder = `Sócios encontrados: ${nomes} (escolha o representante)`;
+      }
     }
 
     // Regime tributario, se a empresa estiver no Simples
@@ -393,9 +466,29 @@ async function cadastrar() {
   const cnpj       = document.getElementById('cnpj').value.trim();
   const telefone   = document.getElementById('telefone').value.trim();
   const responsavel= document.getElementById('responsavel').value.trim();
+  const regime     = document.getElementById('regime')?.value || '';
+  const dataInicio = document.getElementById('inicio_resp')?.value || '';
+  const folha      = document.getElementById('folha')?.value || '';
+  const servicos   = document.getElementById('servicos')?.value || '';
+  const honorario  = document.getElementById('honorario').value.trim();
+  const vencimento = document.getElementById('vencimento').value.trim();
 
-  if (!nome || !cnpj || !responsavel) {
-    addLog('erro', 'Preencha: Nome, CNPJ e Responsável.');
+  const faltando = [];
+  if (!nome) faltando.push('Nome / Razão Social');
+  if (!cnpj) faltando.push('CNPJ');
+  if (!telefone) faltando.push('Telefone WhatsApp');
+  if (!responsavel) faltando.push('Responsável interno');
+  if (tipoAtual === 'cnpj') {
+    if (!regime) faltando.push('Regime Tributário');
+    if (!dataInicio) faltando.push('Data de Assinatura');
+    if (!folha) faltando.push('Folha de Pagamento');
+    if (!servicos) faltando.push('Serviços Contratados');
+  }
+  if (!honorario) faltando.push('Valor do Honorário');
+  if (!vencimento) faltando.push('Dia do Vencimento');
+
+  if (faltando.length > 0) {
+    addLog('erro', 'Preencha os campos obrigatórios: ' + faltando.join(', '));
     return;
   }
 
@@ -414,6 +507,8 @@ async function cadastrar() {
     data_abertura:          document.getElementById('data_abertura').value.trim(),
     tipo:          tipoAtual,
     tipo_servico:  document.querySelector('input[name="tipo_servico"]:checked').value,
+    parcelas:      document.getElementById('parcelas')?.value || '1',
+    intervalo_parcelas: document.getElementById('intervalo_parcelas')?.value || '30',
     forma_pagamento: document.querySelector('input[name="forma_pag"]:checked').value,
     honorario:     document.getElementById('honorario').value.trim(),
     vencimento:    document.getElementById('vencimento').value,
