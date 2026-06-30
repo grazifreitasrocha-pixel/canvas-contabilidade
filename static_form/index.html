@@ -222,6 +222,32 @@ let tipoAtual = 'cnpj';
 let modalidadeAtual = 'Transferência';
 let cnpjTimer = null;
 
+// ───────────────────────────────────────────────────────────
+// Pre-preenche os campos se a URL vier com parametros
+// (ex: ?empresa=X&cnpj=Y&whatsapp=Z), vindos do link que o
+// bot manda quando um negocio e ganho no Agendor
+// ───────────────────────────────────────────────────────────
+function preencherDaURL() {
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.has('empresa')) {
+    document.getElementById('nome').value = params.get('empresa');
+  }
+  if (params.has('cnpj')) {
+    document.getElementById('cnpj').value = params.get('cnpj');
+    // Se o CNPJ veio preenchido, ja dispara a busca automatica
+    onCnpjInput();
+  }
+  if (params.has('whatsapp')) {
+    document.getElementById('telefone').value = params.get('whatsapp');
+  }
+  if (params.has('honorario')) {
+    document.getElementById('honorario').value = params.get('honorario');
+  }
+}
+
+window.addEventListener('DOMContentLoaded', preencherDaURL);
+
 function setTipo(btn) {
   document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('ativo'));
   btn.classList.add('ativo');
