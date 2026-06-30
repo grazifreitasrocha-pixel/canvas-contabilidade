@@ -1,0 +1,5 @@
+[33mcommit fc05685dd91af2975df96840e4c4d5d7c1aad0e9[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: grazifreitasrocha-pixel <grazifreitasrocha@gmail.com>
+Date:   Thu Jun 25 10:52:56 2026 -0300
+
+    Remove lock_socket e adiciona imports completos

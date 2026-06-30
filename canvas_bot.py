@@ -720,7 +720,143 @@ def webhook_agendor():
         )
 
     return jsonify({"status": "ok"}), 200
+MAPA_TIPO_FORM = {
+    "cnpj": "1",
+    "abertura": "3",
+    "alteracao": "3",
+    "baixa": "3",
+    "desenquadramento": "3",
+    "alvaras": "2",
+}
 
+@flask_app.route("/", methods=["GET"])
+@flask_app.route("/cadastrar", methods=["GET"])
+def pagina_formulario():
+    caminho = Path(__file__).parent / "static_form" / "index.html"
+    return caminho.read_text(encoding="utf-8")
+
+
+@flask_app.route("/cadastrar", methods=["POST"])
+def cadastrar_via_formulario():
+    log = []
+
+    try:
+        payload = request.get_json(force=True)
+    except Exception as e:
+        return jsonify({"ok": False, "log": [{"tipo": "erro", "msg": f"Dados invalidos: {e}"}]}), 400
+
+    tipo_codigo = MAPA_TIPO_FORM.get(payload.get("tipo", ""), "1")
+
+    d = {
+        "tipo": tipo_codigo,
+        "empresa": (payload.get("nome") or "").strip().upper(),
+        "cnpj": (payload.get("cnpj") or "").strip(),
+        "regime": payload.get("regime") or "Não informado",
+        "data_inicio": payload.get("inicio_resp") or "",
+        "servicos": payload.get("servicos") or payload.get("tipo_servico", ""),
+        "folha": payload.get("folha") or "Não",
+        "honorario": payload.get("honorario") or "0",
+        "vencimento": payload.get("vencimento") or "10",
+        "responsavel": payload.get("responsavel") or "",
+        "obs": payload.get("observacoes") or "nenhuma",
+        "whatsapp": re.sub(r"\D", "", payload.get("telefone") or ""),
+        "modalidade": payload.get("modalidade") or "Transferência",
+        "representante": payload.get("representante") or "",
+        "cpf_rep": payload.get("cpf") or "",
+    }
+
+    if d["data_inicio"] and "-" in d["data_inicio"]:
+        partes = d["data_inicio"].split("-")
+        if len(partes) == 3:
+            d["data_inicio"] = f"{partes[2]}/{partes[1]}/{partes[0]}"
+
+    trello_url = "—"
+    card_url = None
+    boleto_url = None
+
+    if d["tipo"] not in SEM_TRELLO:
+        try:
+            desc = (
+                f"**Empresa:** {d['empresa']}\n"
+                f"**CNPJ/CPF:** {d['cnpj']}\n"
+                f"**Modalidade:** {d['modalidade']}\n"
+                f"**Regime:** {d['regime']}\n"
+                f"**Inicio:** {d['data_inicio']}\n"
+                f"**Servicos:** {d['servicos']}\n"
+                f"**Folha:** {d['folha']}\n"
+                f"**Honorario:** R$ {d['honorario']} | Venc. {d['vencimento']}\n"
+                f"**Responsavel:** {d['responsavel']}\n"
+                f"**Obs:** {d['obs']}"
+            )
+            trello_url = trello_add_card(
+                d["tipo"], f"{d['empresa']} — {TIPOS[d['tipo']]}", desc
+            )
+            card_url = trello_url
+            log.append({"tipo": "ok", "msg": "Cartão criado no Trello"})
+        except Exception as e:
+            log.append({"tipo": "erro", "msg": f"Trello: {e}"})
+    else:
+        log.append({"tipo": "info", "msg": "Sem Trello para este serviço"})
+
+    try:
+        app_ref = _telegram_app_ref["app"]
+        loop = _main_event_loop["loop"]
+        if app_ref and loop:
+            asyncio.run_coroutine_threadsafe(
+                app_ref.bot.send_message(
+                    chat_id=GROUP_ID,
+                    text=build_group_msg(d, trello_url),
+                    parse_mode="Markdown",
+                ),
+                loop,
+            )
+            log.append({"tipo": "ok", "msg": "Grupo do Telegram notificado"})
+    except Exception as e:
+        log.append({"tipo": "erro", "msg": f"Grupo Telegram: {e}"})
+
+    if d["tipo"] == "1":
+        try:
+            fill_contract(d)
+            log.append({"tipo": "ok", "msg": "Contrato gerado"})
+        except Exception as e:
+            log.append({"tipo": "erro", "msg": f"Contrato: {e}"})
+
+    if payload.get("forma_pagamento") == "boleto":
+        if ASAAS_KEY and ASAAS_KEY != "PREENCHER_COM_CHAVE_ASAAS":
+            try:
+                valor = float(str(d["honorario"]).replace(".", "").replace(",", "."))
+                cid = asaas_customer(d["empresa"], d["cnpj"])
+                bol = asaas_boleto(
+                    cid, valor, int(d["vencimento"]),
+                    f"Honorario {TIPOS[d['tipo']]} — {d['empresa']}",
+                )
+                boleto_url = bol["url"]
+                log.append({"tipo": "ok", "msg": "Boleto gerado no Asaas"})
+            except Exception as e:
+                log.append({"tipo": "erro", "msg": f"Asaas: {e}"})
+        else:
+            log.append({"tipo": "erro", "msg": "Asaas: chave não configurada"})
+    else:
+        log.append({"tipo": "info", "msg": "Pagamento via PIX — sem boleto automático"})
+
+    whatsapp_url = None
+    if d["whatsapp"]:
+        texto_wpp = (
+            f"Olá, {d['empresa'].title()}! 😊\n\n"
+            f"Seja bem-vindo(a) à Canvas Contabilidade!\n\n"
+        )
+        if boleto_url:
+            texto_wpp += f"Segue o link do seu boleto:\n{boleto_url}\n\n"
+        texto_wpp += "Qualquer dúvida, estamos à disposição! 🟢\nCanvas Contabilidade"
+        whatsapp_url = f"https://wa.me/55{d['whatsapp']}?text={urllib.parse.quote(texto_wpp)}"
+
+    return jsonify({
+        "ok": True,
+        "log": log,
+        "card_url": card_url,
+        "boleto_url": boleto_url,
+        "whatsapp_url": whatsapp_url,
+    }), 200
 
 def iniciar_flask():
     porta = int(os.environ.get("PORT", 8080))

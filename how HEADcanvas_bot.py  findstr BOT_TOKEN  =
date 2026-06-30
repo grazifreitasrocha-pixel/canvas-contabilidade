@@ -1,0 +1,42 @@
+[1mdiff --git a/canvas_bot.py b/canvas_bot.py[m
+[1mindex 43aae30..1b428cf 100644[m
+[1m--- a/canvas_bot.py[m
+[1m+++ b/canvas_bot.py[m
+[36m@@ -724,30 +724,6 @@[m [mdef iniciar_flask():[m
+     porta = int(os.environ.get("PORT", 8080))[m
+     flask_app.run(host="0.0.0.0", port=porta, use_reloader=False)[m
+ [m
+[31m-def main():[m
+[31m-    try:[m
+[31m-        while True:[m
+[31m-            try:[m
+[31m-                loop = asyncio.new_event_loop()[m
+[31m-                asyncio.set_event_loop(loop)[m
+[31m-                app = build_app()[m
+[31m-[m
+[31m-                _telegram_app_ref["app"] = app[m
+[31m-                _main_event_loop["loop"] = loop[m
+[31m-[m
+[31m-                flask_thread = threading.Thread(target=iniciar_flask, daemon=True)[m
+[31m-                flask_thread.start()[m
+[31m-[m
+[31m-                print("Canvas Bot rodando -- /novo para cadastrar")[m
+[31m-                print("Webhook do Agendor disponivel em /webhook/agendor")[m
+[31m-                app.run_polling(drop_pending_updates=True)[m
+[31m-                break[m
+[31m-            except Conflict:[m
+[31m-                print("Conflito: outro bot ativo. Aguardando 20s e tentando novamente...")[m
+[31m-                time.sleep(20)[m
+[31m-            except Exception as e:[m
+[31m-                print(f"Erro inesperado: {e}. Reiniciando em 10s...")[m
+[31m-                time.sleep(10)[m
+ [m
+ def main():[m
+     while True:[m
+[36m@@ -774,4 +750,4 @@[m [mdef main():[m
+             time.sleep(10)[m
+ [m
+ if __name__ == "__main__":[m
+[31m-    main()[m
+[32m+[m[32m    main()[m
+\ No newline at end of file[m

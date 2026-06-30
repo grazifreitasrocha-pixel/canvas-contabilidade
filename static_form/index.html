@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Novo Cliente — Canvas</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f3; min-height: 100vh; padding: 32px 16px; }
+
+  .header { text-align: center; margin-bottom: 28px; }
+  .header h1 { color: #1a4a3c; font-size: 22px; font-weight: 800; }
+  .header p  { color: #25695c; font-size: 13px; margin-top: 4px; }
+  .divider   { width: 60px; height: 3px; background: #d2ae6d; margin: 10px auto 0; border-radius: 2px; }
+
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 28px 32px; max-width: 620px; margin: 0 auto; }
+
+  .secao { font-size: 10px; font-weight: 700; color: #25695c; letter-spacing: 1.5px; text-transform: uppercase;
+           border-bottom: 2px solid #e8f5f2; padding-bottom: 6px; margin: 22px 0 16px; }
+  .secao:first-child { margin-top: 0; }
+
+  .field { margin-bottom: 14px; position: relative; }
+  label  { display: block; font-size: 12px; font-weight: 600; color: #1a4a3c; margin-bottom: 5px; }
+  label span { color: #c0392b; }
+  input, select, textarea {
+    width: 100%; padding: 9px 11px; border: 1.5px solid #d0dbd9; border-radius: 7px;
+    font-size: 13px; font-family: inherit; color: #222; background: #fafafa;
+    transition: border 0.2s; outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: #25695c; background: #fff; }
+  textarea { resize: vertical; min-height: 70px; }
+  input:disabled, select:disabled { background: #f0f0f0; color: #999; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  /* CNPJ com busca automática */
+  .cnpj-wrap { position: relative; }
+  .cnpj-status {
+    font-size: 11px; margin-top: 4px; display: none; align-items: center; gap: 5px;
+  }
+  .cnpj-status.buscando { display: flex; color: #888; }
+  .cnpj-status.ok       { display: flex; color: #1a8a4c; }
+  .cnpj-status.erro     { display: flex; color: #c0392b; }
+  .spinner {
+    width: 11px; height: 11px; border: 2px solid #ddd; border-top-color: #25695c;
+    border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Tipo de serviço */
+  .tipo-grid { display: grid; gap: 8px; }
+  .tipo-grupo { display: flex; flex-direction: column; gap: 4px; }
+  .tipo-label-cat { font-size: 10px; font-weight: 700; color: #999; letter-spacing: 1px; text-transform: uppercase; margin-top: 6px; }
+  .tipo-opcoes { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tipo-btn {
+    padding: 7px 14px; border: 2px solid #d0dbd9; border-radius: 20px;
+    font-size: 12px; font-weight: 600; color: #555; cursor: pointer;
+    background: #fff; transition: all 0.15s; white-space: nowrap;
+  }
+  .tipo-btn:hover { border-color: #25695c; color: #25695c; }
+  .tipo-btn.ativo { border-color: #25695c; background: #25695c; color: #fff; }
+  .tipo-btn.ativo.dourado { border-color: #d2ae6d; background: #d2ae6d; color: #fff; }
+
+  /* Modalidade (transferencia/abertura) */
+  .modalidade-opcoes { display: flex; gap: 8px; }
+  .modalidade-btn {
+    flex: 1; padding: 9px; border: 2px solid #d0dbd9; border-radius: 8px;
+    font-size: 12.5px; font-weight: 600; color: #555; cursor: pointer;
+    background: #fff; text-align: center; transition: all 0.15s;
+  }
+  .modalidade-btn.ativo { border-color: #25695c; background: #e8f5f2; color: #1a4a3c; }
+
+  /* Radio inline */
+  .radio-group { display: flex; gap: 20px; flex-wrap: wrap; }
+  .radio-group label { font-weight: 400; display: flex; align-items: center; gap: 6px; cursor: pointer; color: #333; font-size: 13px; }
+
+  .btn {
+    width: 100%; padding: 13px; background: #25695c; color: #fff;
+    font-size: 14px; font-weight: 700; border: none; border-radius: 8px;
+    cursor: pointer; transition: background 0.2s; margin-top: 8px; letter-spacing: 0.3px;
+  }
+  .btn:hover { background: #1a4a3c; }
+  .btn:disabled { background: #aaa; cursor: not-allowed; }
+
+  /* Log */
+  .log-box { margin-top: 18px; display: none; }
+  .log-item { padding: 7px 12px; border-radius: 6px; font-size: 13px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .log-item.ok   { background: #d4edda; color: #155724; }
+  .log-item.erro { background: #f8d7da; color: #721c24; }
+  .log-item.info { background: #e8f5f2; color: #25695c; }
+
+  .acoes-pos { margin-top: 16px; display: none; gap: 10px; flex-wrap: wrap; }
+  .btn-acao {
+    padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700;
+    border: none; cursor: pointer; text-decoration: none; display: inline-block; text-align: center;
+  }
+  .btn-wpp    { background: #25d366; color: #fff; }
+  .btn-trello { background: #0052cc; color: #fff; }
+  .btn-boleto { background: #e67e22; color: #fff; }
+
+  .footer { text-align: center; margin-top: 24px; font-size: 11px; color: #aaa; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🚀 Novo Cliente</h1>
+  <p>Criar cartão no Trello, notificar Telegram e gerar boleto</p>
+  <div class="divider"></div>
+</div>
+
+<div class="card">
+
+  <!-- TIPO DE SERVIÇO -->
+  <div class="secao">Tipo de Serviço</div>
+  <div class="tipo-grupo">
+    <div class="tipo-label-cat">Contábil</div>
+    <div class="tipo-opcoes">
+      <button class="tipo-btn ativo" data-val="cnpj" onclick="setTipo(this)">Integração (CNPJ Existente)</button>
+    </div>
+    <div class="tipo-label-cat">Empresarial</div>
+    <div class="tipo-opcoes">
+      <button class="tipo-btn" data-val="abertura"         onclick="setTipo(this)">Abertura de Empresa</button>
+      <button class="tipo-btn" data-val="alteracao"        onclick="setTipo(this)">Alteração Contratual</button>
+      <button class="tipo-btn" data-val="baixa"            onclick="setTipo(this)">Baixa de Empresa</button>
+      <button class="tipo-btn" data-val="desenquadramento" onclick="setTipo(this)">Desenquadramento de MEI</button>
+    </div>
+    <div class="tipo-label-cat">Alvarás</div>
+    <div class="tipo-opcoes">
+      <button class="tipo-btn dourado" data-val="alvaras" onclick="setTipo(this)">Alvarás e Licenças</button>
+    </div>
+  </div>
+
+  <!-- MODALIDADE -->
+  <div class="secao">Modalidade da Integração</div>
+  <div class="modalidade-opcoes">
+    <div class="modalidade-btn ativo" data-val="Transferência" onclick="setModalidade(this)">🔁 Transferência</div>
+    <div class="modalidade-btn" data-val="Abertura" onclick="setModalidade(this)">🆕 Abertura</div>
+  </div>
+
+  <!-- DADOS DO CLIENTE -->
+  <div class="secao">Dados do Cliente</div>
+  <div class="row2">
+    <div class="field">
+      <label>CNPJ <span>*</span></label>
+      <div class="cnpj-wrap">
+        <input id="cnpj" placeholder="00.000.000/0001-00" oninput="onCnpjInput()">
+      </div>
+      <div class="cnpj-status" id="cnpj-status"></div>
+    </div>
+    <div class="field"><label>Nome / Razão Social <span>*</span></label><input id="nome" placeholder="Preenchido automaticamente"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>Representante Legal</label><input id="representante" placeholder="Nome completo do sócio/titular"></div>
+    <div class="field"><label>CPF do Representante</label><input id="cpf" placeholder="000.000.000-00"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>Telefone WhatsApp <span>*</span></label><input id="telefone" placeholder="64 99202-7010"></div>
+    <div class="field"><label>Responsável interno <span>*</span></label><input id="responsavel" placeholder="Quem da Canvas cuida deste cliente"></div>
+  </div>
+
+  <!-- DADOS CONTÁBEIS (visível só para cnpj) -->
+  <div id="bloco-contabil">
+    <div class="secao">Dados Contábeis</div>
+    <div class="row3">
+      <div class="field"><label>Regime Tributário</label><select id="regime"><option value="">Selecione...</option><option>Simples Nacional</option><option>Lucro Presumido</option><option>Lucro Real</option><option>MEI</option></select></div>
+      <div class="field"><label>Início da Responsabilidade</label><input id="inicio_resp" type="date"></div>
+      <div class="field"><label>Folha de Pagamento</label><select id="folha"><option value="">—</option><option>Sim</option><option>Não</option></select></div>
+    </div>
+    <div class="field"><label>Serviços Contratados</label><input id="servicos" placeholder="Contábil, Fiscal, DP..."></div>
+  </div>
+
+  <!-- PAGAMENTO -->
+  <div class="secao">Honorário e Pagamento</div>
+  <div class="row2">
+    <div class="field"><label>Valor do Honorário</label><input id="honorario" placeholder="350,00"></div>
+    <div class="field"><label>Dia do Vencimento</label>
+      <input id="vencimento" type="number" min="1" max="31" placeholder="Ex: 10" value="15">
+    </div>
+  </div>
+  <div class="field">
+    <label>Forma de Pagamento</label>
+    <div class="radio-group">
+      <label><input type="radio" name="forma_pag" value="boleto" checked> Boleto (gera no Asaas)</label>
+      <label><input type="radio" name="forma_pag" value="pix"> PIX (manual)</label>
+    </div>
+  </div>
+  <div class="field">
+    <label>Tipo de Serviço</label>
+    <div class="radio-group">
+      <label><input type="radio" name="tipo_servico" value="recorrente" checked> Recorrente (mensal)</label>
+      <label><input type="radio" name="tipo_servico" value="venda_unica"> Venda Única</label>
+    </div>
+  </div>
+
+  <!-- OBSERVAÇÕES -->
+  <div class="secao">Observações</div>
+  <div class="field">
+    <label>Detalhes da Solicitação</label>
+    <textarea id="observacoes" placeholder="Descreva a solicitação do cliente, informações relevantes, etc."></textarea>
+  </div>
+
+  <button class="btn" id="btn" onclick="cadastrar()">CADASTRAR CLIENTE</button>
+
+  <!-- Log -->
+  <div class="log-box" id="log-box"></div>
+
+  <!-- Ações pós-cadastro -->
+  <div class="acoes-pos" id="acoes-pos">
+    <a id="btn-wpp"    class="btn-acao btn-wpp"    href="#" target="_blank">💬 Abrir WhatsApp</a>
+    <a id="btn-trello" class="btn-acao btn-trello"  href="#" target="_blank">📋 Ver Cartão no Trello</a>
+    <a id="btn-boleto" class="btn-acao btn-boleto"  href="#" target="_blank" style="display:none">🧾 Ver Boleto</a>
+  </div>
+
+</div>
+
+<div class="footer">Canvas Contabilidade · Uso interno · 2026</div>
+
+<script>
+let tipoAtual = 'cnpj';
+let modalidadeAtual = 'Transferência';
+let cnpjTimer = null;
+
+function setTipo(btn) {
+  document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('ativo'));
+  btn.classList.add('ativo');
+  tipoAtual = btn.dataset.val;
+  document.getElementById('bloco-contabil').style.display = tipoAtual === 'cnpj' ? '' : 'none';
+}
+
+function setModalidade(btn) {
+  document.querySelectorAll('.modalidade-btn').forEach(b => b.classList.remove('ativo'));
+  btn.classList.add('ativo');
+  modalidadeAtual = btn.dataset.val;
+}
+
+document.getElementById('bloco-contabil').style.display = '';
+
+// ───────────────────────────────────────────────────────────
+// Busca automática de dados pelo CNPJ (BrasilAPI)
+// ───────────────────────────────────────────────────────────
+function onCnpjInput() {
+  clearTimeout(cnpjTimer);
+  const cnpjLimpo = document.getElementById('cnpj').value.replace(/\D/g, '');
+  const status = document.getElementById('cnpj-status');
+
+  if (cnpjLimpo.length !== 14) {
+    status.className = 'cnpj-status';
+    status.innerHTML = '';
+    return;
+  }
+
+  // Espera 600ms depois de parar de digitar, pra nao buscar a cada tecla
+  cnpjTimer = setTimeout(() => buscarCnpj(cnpjLimpo), 600);
+}
+
+async function buscarCnpj(cnpj) {
+  const status = document.getElementById('cnpj-status');
+  status.className = 'cnpj-status buscando';
+  status.innerHTML = '<span class="spinner"></span> Buscando dados na Receita...';
+
+  try {
+    const resp = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+    if (!resp.ok) throw new Error('CNPJ não encontrado');
+    const dados = await resp.json();
+
+    document.getElementById('nome').value =
+      dados.nome_fantasia || dados.razao_social || '';
+
+    // Tenta deduzir o regime tributario, se vier informado
+    if (dados.opcao_pelo_simples) {
+      document.getElementById('regime').value = 'Simples Nacional';
+    }
+
+    status.className = 'cnpj-status ok';
+    status.innerHTML = '✅ Dados encontrados: ' + (dados.razao_social || '');
+  } catch (e) {
+    status.className = 'cnpj-status erro';
+    status.innerHTML = '⚠️ Não encontramos esse CNPJ — preencha manualmente';
+  }
+}
+
+function addLog(tipo, msg) {
+  const box = document.getElementById('log-box');
+  box.style.display = 'block';
+  const div = document.createElement('div');
+  div.className = `log-item ${tipo}`;
+  const icons = {ok:'✅', erro:'❌', info:'ℹ️'};
+  div.textContent = (icons[tipo]||'') + ' ' + msg;
+  box.appendChild(div);
+}
+
+async function cadastrar() {
+  const btn = document.getElementById('btn');
+  const logBox = document.getElementById('log-box');
+  const acoes  = document.getElementById('acoes-pos');
+  logBox.innerHTML = '';
+  logBox.style.display = 'none';
+  acoes.style.display  = 'none';
+
+  const nome       = document.getElementById('nome').value.trim();
+  const cnpj       = document.getElementById('cnpj').value.trim();
+  const telefone   = document.getElementById('telefone').value.trim();
+  const responsavel= document.getElementById('responsavel').value.trim();
+
+  if (!nome || !cnpj || !responsavel) {
+    addLog('erro', 'Preencha: Nome, CNPJ e Responsável.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Cadastrando...';
+
+  const payload = {
+    nome, cnpj, telefone, responsavel,
+    modalidade:    modalidadeAtual,
+    representante: document.getElementById('representante').value.trim(),
+    cpf:           document.getElementById('cpf').value.trim(),
+    tipo:          tipoAtual,
+    tipo_servico:  document.querySelector('input[name="tipo_servico"]:checked').value,
+    forma_pagamento: document.querySelector('input[name="forma_pag"]:checked').value,
+    honorario:     document.getElementById('honorario').value.trim(),
+    vencimento:    document.getElementById('vencimento').value,
+    regime:        document.getElementById('regime')?.value || '',
+    inicio_resp:   document.getElementById('inicio_resp')?.value || '',
+    servicos:      document.getElementById('servicos')?.value || '',
+    folha:         document.getElementById('folha')?.value || '',
+    observacoes:   document.getElementById('observacoes').value.trim(),
+  };
+
+  try {
+    const res  = await fetch('/cadastrar', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    const data = await res.json();
+    data.log.forEach(l => addLog(l.tipo, l.msg));
+
+    if (data.ok) {
+      acoes.style.display = 'flex';
+      if (data.whatsapp_url) document.getElementById('btn-wpp').href = data.whatsapp_url;
+      if (data.card_url)     document.getElementById('btn-trello').href = data.card_url;
+      if (data.boleto_url) {
+        const bb = document.getElementById('btn-boleto');
+        bb.href = data.boleto_url;
+        bb.style.display = '';
+      }
+    }
+  } catch(e) {
+    addLog('erro', 'Erro de conexão: ' + e.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'CADASTRAR CLIENTE';
+}
+</script>
+</body>
+</html>
