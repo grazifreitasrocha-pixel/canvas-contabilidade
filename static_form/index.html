@@ -156,6 +156,10 @@
     <div class="field"><label>CPF do Representante</label><input id="cpf" placeholder="000.000.000-00"></div>
   </div>
   <div class="row2">
+    <div class="field"><label>Endereço da Empresa</label><input id="end_empresa" placeholder="Rua, número, bairro, cidade/UF"></div>
+    <div class="field"><label>Endereço do Representante</label><input id="end_rep" placeholder="Rua, número, bairro, cidade/UF"></div>
+  </div>
+  <div class="row2">
     <div class="field"><label>Telefone WhatsApp <span>*</span></label><input id="telefone" placeholder="64 99202-7010"></div>
     <div class="field"><label>Responsável interno <span>*</span></label><input id="responsavel" placeholder="Quem da Canvas cuida deste cliente"></div>
   </div>
@@ -343,6 +347,8 @@ async function cadastrar() {
     modalidade:    modalidadeAtual,
     representante: document.getElementById('representante').value.trim(),
     cpf:           document.getElementById('cpf').value.trim(),
+    end_empresa:   document.getElementById('end_empresa').value.trim(),
+    end_rep:       document.getElementById('end_rep').value.trim(),
     tipo:          tipoAtual,
     tipo_servico:  document.querySelector('input[name="tipo_servico"]:checked').value,
     forma_pagamento: document.querySelector('input[name="forma_pag"]:checked').value,

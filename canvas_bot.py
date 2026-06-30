@@ -74,26 +74,29 @@ ASAAS_URL     = "https://api.asaas.com/v3/payments"
 
 # ── Trello ─────────────────────────────────────────────────────────────────────
 
-def trello_copy_checklists(card_id: str, template_card_id: str):
-    r = requests.get(f"https://api.trello.com/1/cards/{template_card_id}/checklists",
-                     params={"key": TRELLO_KEY, "token": TRELLO_TOK})
-    r.raise_for_status()
-    for checklist in r.json():
-        requests.post("https://api.trello.com/1/checklists",
-                      params={"key": TRELLO_KEY, "token": TRELLO_TOK},
-                      json={"idCard": card_id, "idChecklistSource": checklist["id"]}).raise_for_status()
-
-def trello_add_card(board_key: str, name: str, desc: str) -> str:
-    list_id = ENTRY_LISTS[board_key]
-    r = requests.post("https://api.trello.com/1/cards",
-                      params={"key": TRELLO_KEY, "token": TRELLO_TOK},
-                      json={"name": name, "desc": desc, "idList": list_id, "pos": "top"})
-    r.raise_for_status()
-    card = r.json()
-    if board_key in ("1", "7"):
-        trello_copy_checklists(card["id"], TEMPLATE_CARD_INTEGRACAO)
-    return card["url"]
-
+if d["tipo"] not in SEM_TRELLO:
+try:
+desc = (
+f"Empresa: {d['empresa']}\n"
+f"CNPJ/CPF: {d['cnpj']}\n"
+f"Modalidade: {d['modalidade']}\n"
+f"Regime: {d['regime']}\n"
+f"Inicio: {d['data_inicio']}\n"
+#                 f"Servicos: {d['servicos']}\n"
+#                 f"Folha: {d['folha']}\n"
+#                 f"Honorario: R$ {d['honorario']} - Venc. {d['vencimento']}\n"
+#                 f"Responsavel: {d['responsavel']}\n"
+#                 f"Obs: {d['obs']}"
+#             )
+#             nome_cartao = f"{d['empresa']} - {TIPOS[d['tipo']]}"
+#             trello_url = trello_add_card(d["tipo"], nome_cartao, desc)
+#             card_url = trello_url
+#             log.append({"tipo": "ok", "msg": "Cartão criado no Trello"})
+#         except Exception as e:
+#             log.append({"tipo": "erro", "msg": f"Trello: {e}"})
+#     else:
+#         log.append({"tipo": "info", "msg": "Sem Trello para este serviço"})
+#
 
 # ── Asaas ──────────────────────────────────────────────────────────────────────
 
@@ -217,28 +220,108 @@ def fill_contract(d: dict) -> Path:
 
 
 # ── Mensagem grupo ─────────────────────────────────────────────────────────────
+REGUA_PRAZOS = [
+    {"dias_min": 0, "dias_max": 5, "responsavel": "Bruna", "area": "Cadastral"},
+    {"dias_min": 6, "dias_max": 10, "responsavel": "Fernanda", "area": "Fiscal"},
+    {"dias_min": 11, "dias_max": 15, "responsavel": "Daniela", "area": "Folha"},
+]
+
+
+def calcular_prazos(data_assinatura_texto: str) -> list:
+    """
+    Recebe a data de assinatura (ex: '25/06/2026') e devolve uma lista
+    de dicionarios com a data-limite calculada para cada responsavel,
+    baseado na REGUA_PRAZOS (dias corridos a partir da assinatura).
+    """
+    texto = data_assinatura_texto.strip()
+    partes = re.split(r"[/\-]", texto)
+
+    if len(partes) != 3:
+        return []
+
+    try:
+        dia, mes, ano = int(partes[0]), int(partes[1]), int(partes[2])
+        if ano < 100:
+            ano += 2000
+        data_base = datetime(ano, mes, dia)
+    except (ValueError, IndexError):
+        return []
+
+    resultado = []
+    for regra in REGUA_PRAZOS:
+        data_limite = data_base + timedelta(days=regra["dias_max"])
+        resultado.append({
+            "responsavel": regra["responsavel"],
+            "area": regra["area"],
+            "data_limite": data_limite.strftime("%d/%m/%Y"),
+        })
+    return resultado
+
+
+# Certifique-se de ter este import no topo do arquivo (junto com
+# "from datetime import datetime"):
+#
+#   from datetime import datetime, timedelta
 
 def build_group_msg(d: dict, trello_url: str) -> str:
     label = TIPOS[d["tipo"]]
+    competencia = calcular_competencia(d["data_inicio"])
+    prazos = calcular_prazos(d["data_inicio"])
+
+    modalidade = d.get("modalidade", "Transferência")
+    cnpj_exibir = d["cnpj"] if d["cnpj"] else "Aguardando emissão"
+
+    # Deriva "Comercio" a partir do texto em servicos
+    palavras_comercio = ["comércio", "comercio", "venda", "produtos", "mercadoria", "loja", "varejo"]
+    texto_servicos = d.get("servicos", "").lower()
+    comercio = "Sim" if any(p in texto_servicos for p in palavras_comercio) else "Não"
+
+    # Monta o bloco de prazos e responsaveis
+    bloco_prazos = ""
+    if prazos:
+        linhas_prazo = []
+        for p in prazos:
+            # So mostra a linha de Folha se o cliente realmente tem folha
+            if p["area"] == "Folha" and d.get("folha", "").strip().lower() != "sim":
+                continue
+            linhas_prazo.append(f"• {p['area']} — até {p['data_limite']} ({p['responsavel']})")
+        if linhas_prazo:
+            bloco_prazos = (
+                f"{'─'*30}\n"
+                f"*📤 Prazos e responsáveis:*\n"
+                + "\n".join(linhas_prazo) + "\n"
+            )
+
+    # Próxima etapa do fluxo, baseada no tipo de servico
+    proxima_etapa = "Bruna (Cadastral)" if d["tipo"] not in SEM_TRELLO else "—"
+
     return (
         f"🆕 NOVO CADASTRO\n"
         f"🔖 Tipo: {label}\n"
+        f"🔁 *Modalidade: {modalidade.upper()}*\n"
         f"{'─'*30}\n\n"
         f"🏢 Empresa: {d['empresa']}\n"
-        f"📄 CNPJ/CPF: {d['cnpj']}\n"
+        f"📄 CNPJ/CPF: {cnpj_exibir}\n"
         f"📱 WhatsApp: {d['whatsapp']}\n"
         f"💼 Regime tributário: {d['regime']}\n"
-        f"📅 Início da responsabilidade: {d['data_inicio']}\n"
+        f"🏪 Comércio: {comercio}\n"
+        f"{'─'*30}\n"
+        f"📅 Data de assinatura: {d['data_inicio']}\n"
+        f"🗓️ *COMPETÊNCIA: {competencia.upper()}*\n"
+        f"{'─'*30}\n"
         f"📋 Serviços contratados: {d['servicos']}\n"
-        f"👥 Folha de pagamento: {d['folha']}\n\n"
-        f"💰 Honorário: R$ {d['honorario']} | Venc. {d['vencimento']}\n\n"
-        f"📌 Status atual: Novo cadastro\n\n"
-        f"👩‍💼 Responsável pela integração: {d['responsavel']}\n\n"
-        f"📝 Obs: {d['obs']}\n\n"
+        f"👥 Folha de pagamento: {d['folha']}\n"
+        f"💰 Honorário: R$ {d['honorario']} | Venc. {d['vencimento']}\n"
+        f"{bloco_prazos}"
+        f"{'─'*30}\n"
+        f"📌 Status atual: Novo cadastro\n"
+        f"➡️ *Próxima etapa: {proxima_etapa.upper()}*\n"
+        f"👩‍💼 Cadastrado por: {d['responsavel']}\n"
+        f"{'─'*30}\n"
+        f"📝 Obs: {d['obs']}\n"
         f"🔗 Ver cartão no Trello: {trello_url}\n\n"
         f"Canvas Contabilidade — Aqui a gente não para"
     )
-
 
 # ── Handlers da conversa ───────────────────────────────────────────────────────
 
@@ -763,6 +846,8 @@ def cadastrar_via_formulario():
         "modalidade": payload.get("modalidade") or "Transferência",
         "representante": payload.get("representante") or "",
         "cpf_rep": payload.get("cpf") or "",
+        "end_empresa": payload.get("end_empresa") or "Não informado",
+#       "end_rep": payload.get("end_rep") or "Não informado",
     }
 
     if d["data_inicio"] and "-" in d["data_inicio"]:
