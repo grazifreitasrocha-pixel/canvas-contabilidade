@@ -586,6 +586,10 @@ async def error_handler(update: object, ctx: ContextTypes.DEFAULT_TYPE):
             pass
 
 # ── Main ───────────────────────────────────────────────────────────────────────
+async def meuid(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.message.chat.id
+    chat_type = update.message.chat.type
+    await update.message.reply_text(f"ID deste chat: {chat_id}\nTipo: {chat_type}")
 
 def build_app():
     from telegram.ext import Application as _App
@@ -636,6 +640,7 @@ def build_app():
     app.add_handler(CommandHandler("chatid", chatid))
     app.add_handler(conv)
     app.add_handler(conv_boleto)
+    app.add_handler(CommandHandler("meuid", meuid))
     app.add_error_handler(error_handler)
     return app
 
