@@ -649,23 +649,43 @@ _telegram_app_ref = {"app": None}
 _main_event_loop = {"loop": None}
 
 
+import urllib.parse as _urlparse_helper
+
+URL_BASE_RAILWAY = "https://canvas-contabilidade-production.up.railway.app"
+
+
 def montar_mensagem_agendor(dados_negocio: dict) -> str:
     org = dados_negocio.get("organization", {}) or {}
     nome_empresa = org.get("name", "Não informado")
-    cnpj = org.get("cnpj") or "Não informado"
+    cnpj = org.get("cnpj") or ""
     valor = dados_negocio.get("value", "Não informado")
-    whatsapp = (org.get("contact") or {}).get("whatsapp", "Não informado")
+    whatsapp = (org.get("contact") or {}).get("whatsapp", "") or ""
     titulo = dados_negocio.get("title", "")
+
+    whatsapp_limpo = re.sub(r"\D", "", whatsapp)
+
+    params = {}
+    if nome_empresa and nome_empresa != "Não informado":
+        params["empresa"] = nome_empresa
+    if cnpj:
+        params["cnpj"] = cnpj
+    if whatsapp_limpo:
+        params["whatsapp"] = whatsapp_limpo
+    if valor and valor != "Não informado":
+        params["honorario"] = str(valor)
+
+    query_string = _urlparse_helper.urlencode(params)
+    link_formulario = f"{URL_BASE_RAILWAY}/cadastrar?{query_string}"
 
     return (
         f"🟢 *Novo negócio ganho no Agendor!*\n\n"
         f"*Negócio:* {titulo}\n"
         f"*Empresa:* {nome_empresa}\n"
-        f"*CNPJ:* {cnpj}\n"
+        f"*CNPJ:* {cnpj or 'Não informado'}\n"
         f"*Valor:* R$ {valor}\n"
-        f"*WhatsApp:* {whatsapp}\n\n"
-        f"Use /novo no bot para iniciar o cadastro completo "
-        f"(os dados acima já estão prontos para copiar)."
+        f"*WhatsApp:* {whatsapp or 'Não informado'}\n\n"
+        f"👉 [Clique aqui para completar o cadastro]({link_formulario})\n\n"
+        f"(os dados acima já vêm preenchidos no formulário)"
     )
 
 
