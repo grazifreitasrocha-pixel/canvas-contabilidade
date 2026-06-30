@@ -152,6 +152,13 @@
     <div class="field"><label>Nome / Razão Social <span>*</span></label><input id="nome" placeholder="Preenchido automaticamente"></div>
   </div>
   <div class="row2">
+    <div class="field"><label>Natureza Jurídica</label><input id="natureza_juridica" placeholder="Preenchido automaticamente"></div>
+    <div class="field"><label>Data de Abertura</label><input id="data_abertura" placeholder="Preenchido automaticamente"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>Atividades Secundárias</label><input id="atividades_secundarias" placeholder="Preenchido automaticamente"></div>
+  </div>
+  <div class="row2">
     <div class="field"><label>Representante Legal</label><input id="representante" placeholder="Nome completo do sócio/titular"></div>
     <div class="field"><label>CPF do Representante</label><input id="cpf" placeholder="000.000.000-00"></div>
   </div>
@@ -295,16 +302,69 @@ async function buscarCnpj(cnpj) {
     if (!resp.ok) throw new Error('CNPJ não encontrado');
     const dados = await resp.json();
 
+    // Nome: prioriza nome fantasia, cai para razao social se nao tiver
     document.getElementById('nome').value =
       dados.nome_fantasia || dados.razao_social || '';
 
-    // Tenta deduzir o regime tributario, se vier informado
+    // Natureza juridica (ex: "206-2 - Sociedade Empresária Limitada")
+    const campoNatureza = document.getElementById('natureza_juridica');
+    if (campoNatureza && dados.natureza_juridica) {
+      campoNatureza.value = dados.natureza_juridica;
+    }
+
+    // Data de abertura - vem como aaaa-mm-dd, convertemos para dd/mm/aaaa
+    const campoAbertura = document.getElementById('data_abertura');
+    if (campoAbertura && dados.data_inicio_atividade) {
+      const partes = dados.data_inicio_atividade.split('-');
+      if (partes.length === 3) {
+        campoAbertura.value = `${partes[2]}/${partes[1]}/${partes[0]}`;
+      } else {
+        campoAbertura.value = dados.data_inicio_atividade;
+      }
+    }
+
+    // Atividades secundarias - junta todas em uma lista separada por ;
+    const campoAtivSec = document.getElementById('atividades_secundarias');
+    if (campoAtivSec && Array.isArray(dados.cnaes_secundarios) && dados.cnaes_secundarios.length > 0) {
+      const lista = dados.cnaes_secundarios
+        .map(c => `${c.codigo} - ${c.descricao}`)
+        .join('; ');
+      campoAtivSec.value = lista;
+    }
+
+    // Regime tributario, se a empresa estiver no Simples
     if (dados.opcao_pelo_simples) {
       document.getElementById('regime').value = 'Simples Nacional';
     }
 
+    // Monta o endereco completo, juntando logradouro + numero + bairro + cidade/UF
+    const partesEndereco = [];
+    if (dados.logradouro) {
+      let rua = dados.logradouro;
+      if (dados.numero) rua += ', ' + dados.numero;
+      if (dados.complemento) rua += ' - ' + dados.complemento;
+      partesEndereco.push(rua);
+    }
+    if (dados.bairro) partesEndereco.push(dados.bairro);
+    if (dados.municipio && dados.uf) partesEndereco.push(`${dados.municipio}/${dados.uf}`);
+    if (dados.cep) partesEndereco.push('CEP ' + dados.cep);
+
+    const enderecoCompleto = partesEndereco.join(' - ');
+    const campoEndEmpresa = document.getElementById('end_empresa');
+    if (campoEndEmpresa && enderecoCompleto) {
+      campoEndEmpresa.value = enderecoCompleto;
+    }
+
+    // Preenche os Servicos Contratados com a atividade principal,
+    // como ponto de partida (a Graziele pode editar se precisar)
+    const campoServicos = document.getElementById('servicos');
+    if (campoServicos && dados.cnae_fiscal_descricao && !campoServicos.value) {
+      campoServicos.value = dados.cnae_fiscal_descricao;
+    }
+
     status.className = 'cnpj-status ok';
-    status.innerHTML = '✅ Dados encontrados: ' + (dados.razao_social || '');
+    status.innerHTML = '✅ ' + (dados.razao_social || 'Dados encontrados') +
+      (dados.descricao_situacao_cadastral ? ' — ' + dados.descricao_situacao_cadastral : '');
   } catch (e) {
     status.className = 'cnpj-status erro';
     status.innerHTML = '⚠️ Não encontramos esse CNPJ — preencha manualmente';
@@ -349,6 +409,9 @@ async function cadastrar() {
     cpf:           document.getElementById('cpf').value.trim(),
     end_empresa:   document.getElementById('end_empresa').value.trim(),
     end_rep:       document.getElementById('end_rep').value.trim(),
+    natureza_juridica:      document.getElementById('natureza_juridica').value.trim(),
+    atividades_secundarias: document.getElementById('atividades_secundarias').value.trim(),
+    data_abertura:          document.getElementById('data_abertura').value.trim(),
     tipo:          tipoAtual,
     tipo_servico:  document.querySelector('input[name="tipo_servico"]:checked').value,
     forma_pagamento: document.querySelector('input[name="forma_pag"]:checked').value,
