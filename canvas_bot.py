@@ -72,32 +72,7 @@ ASAAS_URL     = "https://api.asaas.com/v3/payments"
 (BOL_EMPRESA, BOL_CNPJ, BOL_DESC, BOL_VALOR, BOL_VENC, BOL_WHATSAPP) = range(17, 23)
 
 
-# ── Trello ─────────────────────────────────────────────────────────────────────
 
-    if d["tipo"] not in SEM_TRELLO:
-        try:
-            desc = (
-                f"Empresa: {d['empresa']}\n"
-                f"CNPJ/CPF: {d['cnpj']}\n"
-                f"Modalidade: {d['modalidade']}\n"
-                f"Regime: {d['regime']}\n"
-                f"Inicio: {d['data_inicio']}\n"
-                f"Servicos: {d['servicos']}\n"
-                f"Folha: {d['folha']}\n"
-                f"Honorario: R$ {d['honorario']} - Venc. {d['vencimento']}\n"
-                f"Responsavel: {d['responsavel']}\n"
-                f"Obs: {d['obs']}"
-            )
-            nome_cartao = f"{d['empresa']} - {TIPOS[d['tipo']]}"
-            trello_url = trello_add_card(d["tipo"], nome_cartao, desc)
-            card_url = trello_url
-            log.append({"tipo": "ok", "msg": "Cartão criado no Trello"})
-        except Exception as e:
-            log.append({"tipo": "erro", "msg": f"Trello: {e}"})
-    else:
-        log.append({"tipo": "info", "msg": "Sem Trello para este serviço"})
-  
-        
 # ── Asaas ──────────────────────────────────────────────────────────────────────
 
 def _asaas(method: str, path: str, **kwargs):
@@ -847,7 +822,7 @@ def cadastrar_via_formulario():
         "representante": payload.get("representante") or "",
         "cpf_rep": payload.get("cpf") or "",
         "end_empresa": payload.get("end_empresa") or "Não informado",
-#       "end_rep": payload.get("end_rep") or "Não informado",
+        "end_rep": payload.get("end_rep") or "Não informado",
     }
 
     if d["data_inicio"] and "-" in d["data_inicio"]:
@@ -862,20 +837,19 @@ def cadastrar_via_formulario():
     if d["tipo"] not in SEM_TRELLO:
         try:
             desc = (
-                f"**Empresa:** {d['empresa']}\n"
-                f"**CNPJ/CPF:** {d['cnpj']}\n"
-                f"**Modalidade:** {d['modalidade']}\n"
-                f"**Regime:** {d['regime']}\n"
-                f"**Inicio:** {d['data_inicio']}\n"
-                f"**Servicos:** {d['servicos']}\n"
-                f"**Folha:** {d['folha']}\n"
-                f"**Honorario:** R$ {d['honorario']} | Venc. {d['vencimento']}\n"
-                f"**Responsavel:** {d['responsavel']}\n"
-                f"**Obs:** {d['obs']}"
+                f"Empresa: {d['empresa']}\n"
+                f"CNPJ/CPF: {d['cnpj']}\n"
+                f"Modalidade: {d['modalidade']}\n"
+                f"Regime: {d['regime']}\n"
+                f"Inicio: {d['data_inicio']}\n"
+                f"Servicos: {d['servicos']}\n"
+                f"Folha: {d['folha']}\n"
+                f"Honorario: R$ {d['honorario']} - Venc. {d['vencimento']}\n"
+                f"Responsavel: {d['responsavel']}\n"
+                f"Obs: {d['obs']}"
             )
-            trello_url = trello_add_card(
-                d["tipo"], f"{d['empresa']} — {TIPOS[d['tipo']]}", desc
-            )
+            nome_cartao = f"{d['empresa']} - {TIPOS[d['tipo']]}"
+            trello_url = trello_add_card(d["tipo"], nome_cartao, desc)
             card_url = trello_url
             log.append({"tipo": "ok", "msg": "Cartão criado no Trello"})
         except Exception as e:
