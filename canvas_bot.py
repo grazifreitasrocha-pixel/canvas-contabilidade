@@ -1025,6 +1025,45 @@ def cadastrar_via_formulario():
     card_url = None
     boleto_url = None
 
+   if d["tipo"] == "1":
+        try:
+            contract_path = fill_contract(d)
+            log.append({"tipo": "ok", "msg": "Contrato gerado"})
+
+            if contract_path and contract_path.exists() and D4SIGN_TOKEN:
+                try:
+                    email_cliente = payload.get("email") or ""
+                    uuid_doc = enviar_para_d4sign(
+                        contract_path,
+                        email_cliente,
+                        d["empresa"]
+                    )
+                    salvar_pendente(uuid_doc, d)
+                    log.append({
+                        "tipo": "ok",
+                        "msg": "Contrato enviado para assinatura via D4Sign"
+                    })
+                    return jsonify({
+                        "ok": True,
+                        "log": log,
+                        "card_url": None,
+                        "boleto_url": None,
+                        "whatsapp_url": None,
+                        "aguardando_assinatura": True,
+                        "mensagem": (
+                            "✅ Contrato enviado para assinatura! "
+                            "O time operacional será avisado automaticamente "
+                            "após o cliente assinar."
+                        )
+                    }), 200
+
+                except Exception as e:
+                    log.append({"tipo": "erro", "msg": f"D4Sign: {e}"})
+
+        except Exception as e:
+            log.append({"tipo": "erro", "msg": f"Contrato: {e}"})
+
+    # Se nao for tipo 1, ou se o D4Sign falhou, processa imediatamente
     if d["tipo"] not in SEM_TRELLO:
         try:
             desc = (
@@ -1063,26 +1102,7 @@ def cadastrar_via_formulario():
             log.append({"tipo": "ok", "msg": "Grupo do Telegram notificado"})
     except Exception as e:
         log.append({"tipo": "erro", "msg": f"Grupo Telegram: {e}"})
-
-    if d["tipo"] == "1":
-        try:
-            contract_path = fill_contract(d)
-            log.append({"tipo": "ok", "msg": "Contrato gerado"})
-
-            if contract_path and contract_path.exists() and D4SIGN_TOKEN:
-                try:
-                    email_cliente = payload.get("email") or ""
-                    uuid_doc = enviar_para_d4sign(
-                        contract_path,
-                        email_cliente,
-                        d["empresa"]
-                    )
-                    salvar_pendente(uuid_doc, d)
-                    log.append({
-                        "tipo": "ok",
-                        "msg": "Contrato enviado para assinatura via D4Sign"
-                    })
-
+        
                     return jsonify({
                         "ok": True,
                         "log": log,
