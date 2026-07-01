@@ -101,6 +101,7 @@ def enviar_para_d4sign(caminho_pdf: Path, email_cliente: str,
            files={"file": (caminho_pdf.name, f, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")},
         )
     resp.raise_for_status()
+    print("D4SIGN UPLOAD RESPOSTA:", resp.status_code, resp.text[:500])
     uuid_doc = resp.json().get("uuid")
     if not uuid_doc:
         raise ValueError(f"D4Sign nao retornou UUID: {resp.text}")
