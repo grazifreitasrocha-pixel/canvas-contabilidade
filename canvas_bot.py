@@ -101,7 +101,12 @@ def enviar_para_d4sign(caminho_pdf: Path, email_cliente: str,
            files={"file": (caminho_pdf.name, f, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")},
         )
     resp.raise_for_status()
-    print("D4SIGN UPLOAD RESPOSTA:", resp.status_code, resp.text[:500])
+    print("D4SIGN UPLOAD RESPOSTA:", resp.status_code)
+    print("D4SIGN UPLOAD BODY:", resp.text[:1000] if resp.text else "VAZIO")
+    print("D4SIGN SAFE UUID:", D4SIGN_SAFE)
+    print("D4SIGN TOKEN OK:", bool(D4SIGN_TOKEN))
+    print("D4SIGN CRYPT OK:", bool(D4SIGN_CRYPT))
+    print("ARQUIVO:", caminho_pdf.name, caminho_pdf.stat().st_size, "bytes")
     uuid_doc = resp.json().get("uuid")
     if not uuid_doc:
         raise ValueError(f"D4Sign nao retornou UUID: {resp.text}")
