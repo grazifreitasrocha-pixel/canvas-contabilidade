@@ -1,5 +1,7 @@
 import os, re, shutil, urllib.parse, requests, socket, logging
 import asyncio, time, sys
+import json as _json_lib
+import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
 from dotenv import load_dotenv
@@ -34,6 +36,12 @@ GROUP_ID   = int(os.environ["TELEGRAM_GROUP_ID"])
 TRELLO_KEY = os.environ["TRELLO_KEY"]
 TRELLO_TOK = os.environ["TRELLO_API_TOKEN"]
 ASAAS_KEY  = os.environ.get("ASAAS_KEY", "")
+D4SIGN_TOKEN   = os.environ.get("D4SIGN_TOKEN_API", "")
+D4SIGN_CRYPT   = os.environ.get("D4SIGN_CRYPT_KEY", "")
+D4SIGN_SAFE    = os.environ.get("D4SIGN_SAFE_UUID", "")
+D4SIGN_API_URL = "https://secure.d4sign.com.br/api/v1"
+
+PENDENTES_FILE = Path(__file__).parent / "pendentes_assinatura.json"
 
 # Card modelo com checklist de integração
 TEMPLATE_CARD_INTEGRACAO = "KbA4dhyW"
@@ -57,6 +65,118 @@ TIPOS = {
 
 # Tipos que NÃO têm Trello
 SEM_TRELLO = {"4", "5", "6"}
+
+def converter_docx_para_pdf(caminho_docx: Path) -> Path:
+    pasta_saida = caminho_docx.parent
+    subprocess.run(
+        [
+            "libreoffice", "--headless", "--convert-to", "pdf",
+            "--outdir", str(pasta_saida), str(caminho_docx)
+        ],
+        check=True,
+        capture_output=True,
+    )
+    caminho_pdf = pasta_saida / (caminho_docx.stem + ".pdf")
+    if not caminho_pdf.exists():
+        raise FileNotFoundError(f"PDF nao foi gerado: {caminho_pdf}")
+    return caminho_pdf
+
+
+def enviar_para_d4sign(caminho_pdf: Path, email_cliente: str,
+                       nome_cliente: str) -> str:
+    import time as _time
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    params_auth = {
+        "tokenAPI": D4SIGN_TOKEN,
+        "cryptKey": D4SIGN_CRYPT,
+    }
+
+    with open(caminho_pdf, "rb") as f:
+        resp = requests.post(
+            f"{D4SIGN_API_URL}/documents/{D4SIGN_SAFE}/upload",
+            params=params_auth,
+            files={"file": (caminho_pdf.name, f, "application/pdf")},
+        )
+    resp.raise_for_status()
+    uuid_doc = resp.json().get("uuid")
+    if not uuid_doc:
+        raise ValueError(f"D4Sign nao retornou UUID: {resp.text}")
+
+    _time.sleep(3)
+
+    resp = requests.post(
+        f"{D4SIGN_API_URL}/documents/{uuid_doc}/createlist",
+        params=params_auth,
+        headers=headers,
+        json=[{
+            "email": email_cliente,
+            "act": "1",
+            "foreign": "0",
+            "certificadoicpbr": "0",
+            "assinatura_presencial": "0",
+            "embed_methodauth": "email",
+        }],
+    )
+    resp.raise_for_status()
+
+    resp = requests.post(
+        f"{D4SIGN_API_URL}/documents/{uuid_doc}/sendtosign",
+        params=params_auth,
+        headers=headers,
+        json={
+            "message": (
+                f"Olá, {nome_cliente}! "
+                "Segue o contrato de prestação de serviços da Canvas Contabilidade "
+                "para sua assinatura eletrônica. Qualquer dúvida, entre em contato conosco."
+            ),
+            "skip_email": "0",
+            "workflow": "0",
+            "tokenAPI": D4SIGN_TOKEN,
+        },
+    )
+    resp.raise_for_status()
+
+    webhook_url = f"{URL_BASE_RAILWAY}/webhook/d4sign"
+    requests.post(
+        f"{D4SIGN_API_URL}/documents/{uuid_doc}/webhooks",
+        params=params_auth,
+        headers=headers,
+        json={"url": webhook_url},
+    )
+
+    return uuid_doc
+
+
+def salvar_pendente(uuid_doc: str, dados: dict) -> None:
+    pendentes = {}
+    if PENDENTES_FILE.exists():
+        try:
+            pendentes = _json_lib.loads(PENDENTES_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pendentes = {}
+    pendentes[uuid_doc] = dados
+    PENDENTES_FILE.write_text(
+        _json_lib.dumps(pendentes, ensure_ascii=False, indent=2),
+        encoding="utf-8"
+    )
+
+
+def ler_e_remover_pendente(uuid_doc: str) -> dict | None:
+    if not PENDENTES_FILE.exists():
+        return None
+    try:
+        pendentes = _json_lib.loads(PENDENTES_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    dados = pendentes.pop(uuid_doc, None)
+    PENDENTES_FILE.write_text(
+        _json_lib.dumps(pendentes, ensure_ascii=False, indent=2),
+        encoding="utf-8"
+    )
+    return dados
 
 def trello_add_card(tipo: str, nome: str, desc: str) -> str:
     """
@@ -946,8 +1066,41 @@ def cadastrar_via_formulario():
 
     if d["tipo"] == "1":
         try:
-            fill_contract(d)
+            contract_path = fill_contract(d)
             log.append({"tipo": "ok", "msg": "Contrato gerado"})
+
+            if contract_path and contract_path.exists() and D4SIGN_TOKEN:
+                try:
+                    caminho_pdf = converter_docx_para_pdf(contract_path)
+                    email_cliente = payload.get("email") or ""
+                    uuid_doc = enviar_para_d4sign(
+                        caminho_pdf,
+                        email_cliente,
+                        d["empresa"]
+                    )
+                    salvar_pendente(uuid_doc, d)
+                    log.append({
+                        "tipo": "ok",
+                        "msg": "Contrato enviado para assinatura via D4Sign"
+                    })
+
+                    return jsonify({
+                        "ok": True,
+                        "log": log,
+                        "card_url": None,
+                        "boleto_url": None,
+                        "whatsapp_url": None,
+                        "aguardando_assinatura": True,
+                        "mensagem": (
+                            "✅ Contrato enviado para assinatura! "
+                            "O time operacional será avisado automaticamente "
+                            "após o cliente assinar."
+                        )
+                    }), 200
+
+                except Exception as e:
+                    log.append({"tipo": "erro", "msg": f"D4Sign: {e}"})
+
         except Exception as e:
             log.append({"tipo": "erro", "msg": f"Contrato: {e}"})
 
@@ -987,6 +1140,107 @@ def cadastrar_via_formulario():
         "boleto_url": boleto_url,
         "whatsapp_url": whatsapp_url,
     }), 200
+
+@flask_app.route("/webhook/d4sign", methods=["POST"])
+def webhook_d4sign():
+    try:
+        payload = request.get_json(force=True)
+    except Exception:
+        payload = {}
+
+    print("WEBHOOK D4SIGN RECEBIDO:", payload)
+
+    uuid_doc = payload.get("uuid_document") or payload.get("uuidDoc")
+    tipo_evento = payload.get("type", "")
+
+    if tipo_evento not in ("FINISHED", "SIGNED", "4"):
+        return jsonify({"status": "ignorado", "tipo": tipo_evento}), 200
+
+    if not uuid_doc:
+        return jsonify({"erro": "uuid_document ausente"}), 400
+
+    d = ler_e_remover_pendente(uuid_doc)
+    if not d:
+        return jsonify({"erro": "Cadastro nao encontrado para este documento"}), 404
+
+    erros = []
+    trello_url = "—"
+    boleto_url = "—"
+
+    if d["tipo"] not in SEM_TRELLO:
+        try:
+            desc = (
+                f"Empresa: {d['empresa']}\n"
+                f"CNPJ/CPF: {d['cnpj']}\n"
+                f"Modalidade: {d.get('modalidade', '')}\n"
+                f"Regime: {d['regime']}\n"
+                f"Inicio: {d['data_inicio']}\n"
+                f"Servicos: {d['servicos']}\n"
+                f"Folha: {d['folha']}\n"
+                f"Honorario: R$ {d['honorario']} - Venc. {d['vencimento']}\n"
+                f"Responsavel: {d['responsavel']}\n"
+                f"Obs: {d['obs']}"
+            )
+            nome_cartao = f"{d['empresa']} - {TIPOS[d['tipo']]}"
+            trello_url = trello_add_card(d["tipo"], nome_cartao, desc)
+        except Exception as e:
+            erros.append(f"Trello: {e}")
+    else:
+        trello_url = "sem Trello para este servico"
+
+    app_ref = _telegram_app_ref["app"]
+    loop = _main_event_loop["loop"]
+    if app_ref and loop:
+        try:
+            asyncio.run_coroutine_threadsafe(
+                app_ref.bot.send_message(
+                    chat_id=GROUP_ID,
+                    text=build_group_msg(d, trello_url),
+                    parse_mode="Markdown",
+                ),
+                loop,
+            )
+        except Exception as e:
+            erros.append(f"Grupo Telegram: {e}")
+
+    if ASAAS_KEY and ASAAS_KEY != "PREENCHER_COM_CHAVE_ASAAS":
+        try:
+            valor = float(str(d["honorario"]).replace(".", "").replace(",", "."))
+            cid = asaas_customer(d["empresa"], d["cnpj"])
+            bol = asaas_boleto(
+                cid, valor, int(d["vencimento"]),
+                f"Honorario {TIPOS[d['tipo']]} — {d['empresa']}",
+            )
+            boleto_url = bol["url"]
+        except Exception as e:
+            erros.append(f"Asaas: {e}")
+
+    if d.get("whatsapp") and app_ref and loop:
+        try:
+            wa_text = (
+                f"Olá, {d['empresa'].title()}! 😊\n\n"
+                f"Seja bem-vindo(a) à Canvas Contabilidade!\n\n"
+                f"Seu contrato foi assinado com sucesso. "
+                f"Estamos muito felizes em tê-lo(a) como cliente!\n\n"
+            )
+            if boleto_url and boleto_url != "—":
+                wa_text += f"Segue o link do seu boleto:\n{boleto_url}\n\n"
+            wa_text += "Qualquer dúvida, estamos à disposição! 🟢\nCanvas Contabilidade"
+            wa_link = f"https://wa.me/55{d['whatsapp']}?text={urllib.parse.quote(wa_text)}"
+
+            asyncio.run_coroutine_threadsafe(
+                app_ref.bot.send_message(
+                    chat_id=GROUP_ID,
+                    text=f"📱 *Link de boas-vindas pronto para enviar:*\n{wa_link}",
+                    parse_mode="Markdown",
+                    disable_web_page_preview=True,
+                ),
+                loop,
+            )
+        except Exception as e:
+            erros.append(f"WhatsApp link: {e}")
+
+    return jsonify({"status": "ok", "erros": erros}), 200
 
 def iniciar_flask():
     porta = int(os.environ.get("PORT", 8080))
