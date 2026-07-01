@@ -98,7 +98,7 @@ def enviar_para_d4sign(caminho_pdf: Path, email_cliente: str,
         resp = requests.post(
             f"{D4SIGN_API_URL}/documents/{D4SIGN_SAFE}/upload",
             params=params_auth,
-            files={"file": (caminho_pdf.name, f, "application/pdf")},
+           files={"file": (caminho_pdf.name, f, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")},
         )
     resp.raise_for_status()
     uuid_doc = resp.json().get("uuid")
@@ -1074,9 +1074,9 @@ def cadastrar_via_formulario():
                     caminho_pdf = converter_docx_para_pdf(contract_path)
                     email_cliente = payload.get("email") or ""
                     uuid_doc = enviar_para_d4sign(
-                        caminho_pdf,
-                        email_cliente,
-                        d["empresa"]
+                                contract_path,
+                                email_cliente,
+                                d["empresa"]
                     )
                     salvar_pendente(uuid_doc, d)
                     log.append({
