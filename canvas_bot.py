@@ -1025,7 +1025,7 @@ def cadastrar_via_formulario():
     card_url = None
     boleto_url = None
 
-   if d["tipo"] == "1":
+    if d["tipo"] == "1":
         try:
             contract_path = fill_contract(d)
             log.append({"tipo": "ok", "msg": "Contrato gerado"})
@@ -1103,25 +1103,6 @@ def cadastrar_via_formulario():
     except Exception as e:
         log.append({"tipo": "erro", "msg": f"Grupo Telegram: {e}"})
         
-                    return jsonify({
-                        "ok": True,
-                        "log": log,
-                        "card_url": None,
-                        "boleto_url": None,
-                        "whatsapp_url": None,
-                        "aguardando_assinatura": True,
-                        "mensagem": (
-                            "✅ Contrato enviado para assinatura! "
-                            "O time operacional será avisado automaticamente "
-                            "após o cliente assinar."
-                        )
-                    }), 200
-
-                except Exception as e:
-                    log.append({"tipo": "erro", "msg": f"D4Sign: {e}"})
-
-        except Exception as e:
-            log.append({"tipo": "erro", "msg": f"Contrato: {e}"})
 
     if payload.get("forma_pagamento") == "boleto":
         if ASAAS_KEY and ASAAS_KEY != "PREENCHER_COM_CHAVE_ASAAS":
