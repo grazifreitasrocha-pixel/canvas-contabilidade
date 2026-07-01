@@ -1071,12 +1071,11 @@ def cadastrar_via_formulario():
 
             if contract_path and contract_path.exists() and D4SIGN_TOKEN:
                 try:
-                    caminho_pdf = converter_docx_para_pdf(contract_path)
                     email_cliente = payload.get("email") or ""
                     uuid_doc = enviar_para_d4sign(
-                                contract_path,
-                                email_cliente,
-                                d["empresa"]
+                        contract_path,
+                        email_cliente,
+                        d["empresa"]
                     )
                     salvar_pendente(uuid_doc, d)
                     log.append({
